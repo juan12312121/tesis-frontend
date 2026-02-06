@@ -131,10 +131,11 @@
 </app-modal-horarios>
 
 <!-- Modal: Respuestas -->
-<app-modal-respuesta
+<app-modal-mensajes
   [isOpen]="showModalRespuesta"
   [editingRespuesta]="editingRespuesta"
+  [empresaId]="empresa.id"
   [isSaving]="isSaving"
   (close)="closeModalRespuesta()"
   (save)="guardarRespuesta($event)">
-</app-modal-respuesta>
+</app-modal-mensajes>

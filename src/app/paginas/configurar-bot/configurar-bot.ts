@@ -3,10 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { SidebarComponent } from '../../componentes/aside/aside';
-import { ModalRespuestaComponent, RespuestaAutomatica } from '../../componentes/modal-respuesta-component/modal-respuesta-component';
 import { Horarios } from '../../componentes/configuracion-bot/horarios/horarios';
-import { Mensajes } from '../../componentes/configuracion-bot/mensajes/mensajes';
+import { Mensajes, RespuestaAutomatica } from '../../componentes/configuracion-bot/mensajes/mensajes';
 import { ModalHorarios } from '../../componentes/configuracion-bot/modal-horarios/modal-horarios';
+import { ModalMensajes } from '../../componentes/configuracion-bot/modal-mensajes/modal-mensajes';
 
 @Component({
   selector: 'app-configurar-bot',
@@ -15,10 +15,10 @@ import { ModalHorarios } from '../../componentes/configuracion-bot/modal-horario
     CommonModule,
     FormsModule,
     SidebarComponent,
-    ModalRespuestaComponent,
     Horarios,
     Mensajes,
-    ModalHorarios
+    ModalHorarios,
+    ModalMensajes
   ],
   templateUrl: './configurar-bot.html'
 })
@@ -53,7 +53,7 @@ export class ConfigurarBotComponent implements OnInit {
   isSaving = false;
 
   // Días de la semana
-  diasSemana = [
+  diasSemana: any[] = [
     { id: 'lunes', nombre: 'Lunes', activo: false },
     { id: 'martes', nombre: 'Martes', activo: false },
     { id: 'miercoles', nombre: 'Miércoles', activo: false },
