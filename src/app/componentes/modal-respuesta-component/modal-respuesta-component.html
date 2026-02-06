@@ -1,0 +1,133 @@
+<!-- Modal: Nueva/Editar Respuesta -->
+<div *ngIf="isOpen"
+     class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="modal-title"
+     (click)="onClose()">
+
+  <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto animate-scale-in"
+       (click)="$event.stopPropagation()">
+
+    <!-- Modal Header -->
+    <div class="p-6 border-b border-gray-200 bg-gradient-to-r from-blue-50 to-indigo-50">
+      <div class="flex items-center justify-between">
+        <h3 id="modal-title" class="text-2xl font-black text-gray-900 flex items-center">
+          <i class="fas fa-comment-dots text-blue-600 mr-3" aria-hidden="true"></i>
+          {{ editingRespuesta ? 'Editar Respuesta' : 'Nueva Respuesta Automática' }}
+        </h3>
+        <button (click)="onClose()"
+                class="text-gray-400 hover:text-gray-600 transition"
+                aria-label="Cerrar modal">
+          <i class="fas fa-times text-2xl" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Body -->
+    <div class="p-6 space-y-6">
+
+      <!-- Texto Disparador -->
+      <div>
+        <label class="block mb-2">
+          <span class="text-gray-900 font-bold text-sm flex items-center">
+            <i class="fas fa-bullseye text-blue-600 mr-2" aria-hidden="true"></i>
+            Texto Disparador
+            <span class="text-red-500 ml-1">*</span>
+          </span>
+          <span class="text-gray-500 text-xs">Palabras clave que activarán esta respuesta</span>
+        </label>
+        <input type="text"
+               [(ngModel)]="formRespuesta.texto_disparador"
+               placeholder="Ej: horario, horarios, a qué hora"
+               class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+               aria-required="true" />
+      </div>
+
+      <!-- Respuesta -->
+      <div>
+        <label class="block mb-2">
+          <span class="text-gray-900 font-bold text-sm flex items-center">
+            <i class="fas fa-reply text-green-600 mr-2" aria-hidden="true"></i>
+            Respuesta
+            <span class="text-red-500 ml-1">*</span>
+          </span>
+          <span class="text-gray-500 text-xs">El mensaje que se enviará automáticamente</span>
+        </label>
+        <textarea [(ngModel)]="formRespuesta.respuesta"
+                  rows="5"
+                  placeholder="Ej: Nuestro horario de atención es de Lunes a Viernes de 9:00 AM a 6:00 PM"
+                  class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none transition"
+                  aria-required="true"></textarea>
+        <div class="mt-1 flex items-center justify-between">
+          <span class="text-xs text-gray-500">
+            <i class="fas fa-info-circle mr-1" aria-hidden="true"></i>
+            Puedes usar iconos de Font Awesome en tu respuesta
+          </span>
+          <span class="text-xs text-gray-500">{{ formRespuesta.respuesta?.length || 0 }} caracteres</span>
+        </div>
+      </div>
+
+      <!-- Tipo de Respuesta (Oculto si solo hay texto) -->
+      <div *ngIf="tiposRespuesta.length > 1">
+        <label class="block mb-2">
+          <span class="text-gray-900 font-bold text-sm flex items-center">
+            <i class="fas fa-layer-group text-purple-600 mr-2" aria-hidden="true"></i>
+            Tipo de Respuesta
+          </span>
+        </label>
+        <select [(ngModel)]="formRespuesta.tipo_respuesta"
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                aria-label="Tipo de respuesta">
+          <option *ngFor="let tipo of tiposRespuesta" [value]="tipo.valor">
+            {{ tipo.etiqueta }}
+          </option>
+        </select>
+
+        <!-- Preview del tipo seleccionado -->
+        <div class="mt-2 text-sm text-gray-600 flex items-center">
+          <i [class]="getSelectedTipoIcono()" aria-hidden="true"></i>
+          <span>{{ getSelectedTipoEtiqueta() }}</span>
+        </div>
+      </div>
+
+      <!-- Indicador de tipo cuando solo hay una opción -->
+      <div *ngIf="tiposRespuesta.length === 1" class="bg-gray-50 border border-gray-200 rounded-lg p-3">
+        <div class="flex items-center text-sm text-gray-600">
+          <i [class]="getSelectedTipoIcono()" aria-hidden="true"></i>
+          <span class="ml-2">Tipo: <strong>{{ getSelectedTipoEtiqueta() }}</strong></span>
+        </div>
+      </div>
+
+      <!-- Ayuda contextual -->
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div class="flex items-start space-x-3">
+          <i class="fas fa-lightbulb text-blue-600 text-lg mt-0.5" aria-hidden="true"></i>
+          <div class="flex-1">
+            <h4 class="text-sm font-bold text-blue-900 mb-1">Consejo</h4>
+            <p class="text-sm text-blue-800">
+              Usa palabras clave específicas y mantén las respuestas claras y concisas.
+              El sistema detectará coincidencias parciales en los mensajes de los usuarios.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer -->
+    <div class="p-6 bg-gray-50 border-t border-gray-200 flex justify-end space-x-3">
+      <button (click)="onClose()"
+              class="bg-white border-2 border-gray-300 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-50 transition flex items-center space-x-2">
+        <i class="fas fa-times" aria-hidden="true"></i>
+        <span>Cancelar</span>
+      </button>
+
+      <button (click)="onSave()"
+              [disabled]="isSaving || !isFormValid()"
+              class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2">
+        <i [ngClass]="isSaving ? 'fa-spinner fa-spin' : 'fa-save'" class="fas" aria-hidden="true"></i>
+        <span>{{ editingRespuesta ? 'Actualizar' : 'Crear' }} Respuesta</span>
+      </button>
+    </div>
+  </div>
+</div>

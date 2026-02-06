@@ -1,0 +1,528 @@
+<!-- pedidos.html - Vista de Tabla Completa ACTUALIZADA -->
+
+<!-- Loading State -->
+<div *ngIf="cargando" class="flex items-center justify-center h-screen bg-gray-50">
+  <div class="text-center">
+    <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
+    <p class="text-gray-600 font-semibold">Cargando pedidos...</p>
+  </div>
+</div>
+
+<!-- Main Layout with Sidebar -->
+<div *ngIf="!cargando" class="flex h-screen overflow-hidden bg-gray-50">
+
+  <!-- Sidebar Component -->
+  <app-sidebar [sidebarOpen]="sidebarOpen" [empresa]="empresa" [usuario]="usuario" [currentRoute]="currentRoute"
+    [unreadMessages]="0" (navigate)="handleNavigation($event)" (logout)="handleLogout()">
+  </app-sidebar>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- Top Header -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+      <div class="flex items-center justify-between px-4 sm:px-6 py-4">
+        <div class="flex items-center space-x-4">
+          <button (click)="toggleSidebar()" class="lg:hidden text-gray-600 hover:text-gray-900">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+          <div>
+            <h2 class="text-xl sm:text-2xl font-black text-gray-900 flex items-center space-x-2">
+              <i class="fas fa-shopping-cart text-blue-600"></i>
+              <span>Gestión de Pedidos</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-gray-500 font-medium hidden sm:block">Administra y da seguimiento a tus
+              pedidos</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Area with Scroll -->
+    <main class="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6">
+      <!-- Mensaje de notificación -->
+      <div *ngIf="mensaje.mostrar" [class]="'mb-6 p-4 rounded-lg border flex items-center justify-between ' +
+                    (mensaje.tipo === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200')">
+        <div class="flex items-center space-x-3">
+          <i
+            [class]="'fas ' + (mensaje.tipo === 'success' ? 'fa-check-circle text-green-600' : 'fa-exclamation-circle text-red-600')"></i>
+          <span [class]="'font-semibold text-sm ' + (mensaje.tipo === 'success' ? 'text-green-800' : 'text-red-800')">
+            {{ mensaje.texto }}
+          </span>
+        </div>
+        <button (click)="cerrarMensaje()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Filtros y Búsqueda -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Búsqueda -->
+          <div class="md:col-span-2">
+            <label class="block text-sm font-bold text-gray-700 mb-2">
+              <i class="fas fa-search mr-2"></i>Buscar Pedido
+            </label>
+            <div class="relative flex space-x-2">
+              <div class="relative flex-1">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" [(ngModel)]="terminoBusqueda" (input)="aplicarFiltros()"
+                  placeholder="Buscar por cliente, teléfono o ID..."
+                  class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium">
+              </div>
+              <button *ngIf="terminoBusqueda" (click)="limpiarBusqueda()"
+                class="bg-gray-200 text-gray-700 font-bold px-4 py-3 rounded-lg hover:bg-gray-300 transition">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+
+          <!-- Items por página -->
+          <div>
+            <label class="block text-sm font-bold text-gray-700 mb-2">
+              <i class="fas fa-list-ol mr-2"></i>Mostrar
+            </label>
+            <select [(ngModel)]="itemsPorPagina" (change)="actualizarPaginacion()"
+              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium">
+              <option [value]="10">10 pedidos</option>
+              <option [value]="25">25 pedidos</option>
+              <option [value]="50">50 pedidos</option>
+              <option [value]="100">100 pedidos</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Filtros de estado -->
+        <div class="mt-4">
+          <label class="block text-sm font-bold text-gray-700 mb-2">
+            <i class="fas fa-filter mr-2"></i>Filtrar por estado
+          </label>
+          <div class="flex flex-wrap gap-2">
+            <button
+              [class]="'px-4 py-2 rounded-lg font-bold transition text-sm flex items-center space-x-2 ' +
+                       (filtroEstado === 'todos' ? 'bg-blue-600 text-white shadow-lg' : 'bg-gray-200 text-gray-700 hover:bg-gray-300')"
+              (click)="cambiarFiltroEstado('todos')">
+              <i class="fas fa-th"></i>
+              <span>Todos ({{ pedidos.length }})</span>
+            </button>
+            <button
+              [class]="'px-4 py-2 rounded-lg font-bold transition text-sm flex items-center space-x-2 ' +
+                       (filtroEstado === 'pendiente' ? 'bg-yellow-600 text-white shadow-lg' : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200')"
+              (click)="cambiarFiltroEstado('pendiente')">
+              <i class="fas fa-clock"></i>
+              <span>Pendientes</span>
+            </button>
+            <button
+              [class]="'px-4 py-2 rounded-lg font-bold transition text-sm flex items-center space-x-2 ' +
+                       (filtroEstado === 'en_proceso' ? 'bg-blue-600 text-white shadow-lg' : 'bg-blue-100 text-blue-800 hover:bg-blue-200')"
+              (click)="cambiarFiltroEstado('en_proceso')">
+              <i class="fas fa-sync"></i>
+              <span>En Proceso</span>
+            </button>
+            <button
+              [class]="'px-4 py-2 rounded-lg font-bold transition text-sm flex items-center space-x-2 ' +
+                       (filtroEstado === 'entregado' ? 'bg-green-600 text-white shadow-lg' : 'bg-green-100 text-green-800 hover:bg-green-200')"
+              (click)="cambiarFiltroEstado('entregado')">
+              <i class="fas fa-check-circle"></i>
+              <span>Entregados</span>
+            </button>
+            <button
+              [class]="'px-4 py-2 rounded-lg font-bold transition text-sm flex items-center space-x-2 ' +
+                       (filtroEstado === 'cancelado' ? 'bg-red-600 text-white shadow-lg' : 'bg-red-100 text-red-800 hover:bg-red-200')"
+              (click)="cambiarFiltroEstado('cancelado')">
+              <i class="fas fa-times-circle"></i>
+              <span>Cancelados</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla de Pedidos -->
+      <div *ngIf="pedidosFiltrados.length > 0"
+        class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+        <!-- Header de la tabla con contador -->
+        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <div class="flex items-center justify-between">
+            <h3 class="text-lg font-black text-gray-900">
+              <i class="fas fa-list mr-2 text-blue-600"></i>
+              Lista de Pedidos
+            </h3>
+            <span class="text-sm font-semibold text-gray-600">
+              Mostrando {{ rangoItems }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Tabla responsive -->
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-100 border-b-2 border-gray-300">
+              <tr>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">
+                  ID
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">
+                  Cliente
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">
+                  Teléfono
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">
+                  Estado
+                </th>
+                <th class="px-6 py-4 text-right text-xs font-black text-gray-700 uppercase tracking-wider">
+                  Total
+                </th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">
+                  Fecha
+                </th>
+                <th class="px-6 py-4 text-center text-xs font-black text-gray-700 uppercase tracking-wider">
+                  Acciones
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              <tr *ngFor="let pedido of pedidosPaginados" class="hover:bg-blue-50 transition">
+                <!-- ID -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="flex items-center">
+                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
+                      <i class="fas fa-hashtag text-blue-600"></i>
+                    </div>
+                    <span class="ml-3 text-sm font-black text-gray-900">{{ pedido.id }}</span>
+                  </div>
+                </td>
+
+                <!-- Cliente -->
+                <td class="px-6 py-4">
+                  <div class="flex items-center">
+                    <div
+                      class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
+                      {{ pedido.nombre_cliente ? pedido.nombre_cliente.charAt(0).toUpperCase() : '?' }} </div>
+                    <div class="ml-3">
+                      <p class="text-sm font-bold text-gray-900">{{ pedido.nombre_cliente || 'Sin nombre' }}</p>
+                    </div>
+                  </div>
+                </td>
+
+                <!-- Teléfono -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <a *ngIf="pedido.telefono_cliente"
+                    [href]="'https://wa.me/' + formatearTelefono(pedido.telefono_cliente)" target="_blank"
+                    class="inline-flex items-center space-x-2 text-sm font-semibold text-green-600 hover:text-green-700 transition">
+                    <i class="fab fa-whatsapp text-lg"></i>
+                    <span>{{ formatearTelefono(pedido.telefono_cliente) }}</span>
+                  </a>
+                  <span *ngIf="!pedido.telefono_cliente" class="text-sm text-gray-400">Sin teléfono</span>
+                </td>
+
+                <!-- Estado -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span
+                    [class]="'inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border-2 ' + getEstadoColor(pedido.estado)">
+                    <i [class]="'fas ' + getEstadoIcono(pedido.estado)"></i>
+                    <span>{{ getEstadoTexto(pedido.estado) }}</span>
+                  </span>
+                </td>
+
+                <!-- Total -->
+                <td class="px-6 py-4 whitespace-nowrap text-right">
+                  <span class="text-lg font-black text-gray-900">{{ formatearPrecio(pedido.total) }}</span>
+                </td>
+
+                <!-- Fecha -->
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <div class="text-sm">
+                    <p class="text-gray-900 font-semibold">
+                      {{ formatearFechaCorta(pedido.fecha_creacion) }}
+                    </p>
+                    <p class="text-gray-500 text-xs">
+                      {{ formatearHora(pedido.fecha_creacion) }}
+                    </p>
+                  </div>
+                </td>
+
+                <!-- Acciones -->
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <div class="flex items-center justify-center space-x-2">
+                    <button (click)="verDetalle(pedido)"
+                      class="bg-blue-100 text-blue-700 hover:bg-blue-200 font-bold p-2 rounded-lg transition"
+                      title="Ver detalle">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <div *ngIf="pedido.estado === 'pendiente' || pedido.estado === 'en_proceso'" class="relative">
+                      <button (click)="toggleEstadoMenu(pedido.id)"
+                        class="bg-gray-100 text-gray-700 hover:bg-gray-200 font-bold p-2 rounded-lg transition"
+                        title="Cambiar estado">
+                        <i class="fas fa-ellipsis-v"></i>
+                      </button>
+
+                      <!-- Dropdown de estados -->
+                      <div *ngIf="menuEstadoAbierto === pedido.id"
+                        class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl border-2 border-gray-200 z-50">
+                        <div class="py-1">
+                          <button *ngIf="pedido.estado === 'pendiente'"
+                            (click)="actualizarEstado(pedido.id, 'en_proceso')" [disabled]="actualizando"
+                            class="w-full text-left px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 flex items-center space-x-2 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fas fa-sync text-blue-600"></i>
+                            <span>En Proceso</span>
+                          </button>
+                          <button (click)="actualizarEstado(pedido.id, 'entregado')" [disabled]="actualizando"
+                            class="w-full text-left px-4 py-2 text-sm font-semibold text-green-700 hover:bg-green-50 flex items-center space-x-2 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fas fa-check-circle text-green-600"></i>
+                            <span>Entregado</span>
+                          </button>
+                          <button (click)="actualizarEstado(pedido.id, 'cancelado')" [disabled]="actualizando"
+                            class="w-full text-left px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50 flex items-center space-x-2 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                            <i class="fas fa-times-circle text-red-600"></i>
+                            <span>Cancelar</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Footer de la tabla con paginación -->
+        <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <!-- Info de paginación -->
+            <div class="text-sm text-gray-600 font-medium">
+              Página <span class="font-bold text-gray-900">{{ paginaActual }}</span> de
+              <span class="font-bold text-gray-900">{{ totalPaginas }}</span>
+            </div>
+
+            <!-- Controles de paginación -->
+            <div class="flex items-center space-x-2">
+              <!-- Primera página -->
+              <button (click)="cambiarPagina(1)" [disabled]="paginaActual === 1"
+                [class]="'p-2 rounded-lg font-bold transition ' +
+                         (paginaActual === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-blue-100 border border-gray-300')"
+                title="Primera página">
+                <i class="fas fa-angle-double-left"></i>
+              </button>
+
+              <!-- Anterior -->
+              <button (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1"
+                [class]="'px-4 py-2 rounded-lg font-semibold transition ' +
+                         (paginaActual === 1 ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-blue-100 border border-gray-300')">
+                <i class="fas fa-chevron-left mr-2"></i>
+                <span class="hidden sm:inline">Anterior</span>
+              </button>
+
+              <!-- Números de página -->
+              <div class="hidden md:flex items-center space-x-1">
+                <button *ngFor="let pagina of paginasVisibles" (click)="pagina !== -1 && cambiarPagina(pagina)"
+                  [disabled]="pagina === -1" [class]="'w-10 h-10 rounded-lg font-bold transition flex items-center justify-center ' +
+                           (pagina === paginaActual ? 'bg-blue-600 text-white shadow-lg' :
+                            pagina === -1 ? 'bg-transparent text-gray-400 cursor-default' :
+                            'bg-white text-gray-700 hover:bg-blue-100 border border-gray-300')">
+                  {{ pagina === -1 ? '...' : pagina }}
+                </button>
+              </div>
+
+              <!-- Siguiente -->
+              <button (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas"
+                [class]="'px-4 py-2 rounded-lg font-semibold transition ' +
+                         (paginaActual === totalPaginas ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-blue-100 border border-gray-300')">
+                <span class="hidden sm:inline">Siguiente</span>
+                <i class="fas fa-chevron-right ml-2"></i>
+              </button>
+
+              <!-- Última página -->
+              <button (click)="cambiarPagina(totalPaginas)" [disabled]="paginaActual === totalPaginas"
+                [class]="'p-2 rounded-lg font-bold transition ' +
+                         (paginaActual === totalPaginas ? 'bg-gray-200 text-gray-400 cursor-not-allowed' : 'bg-white text-gray-700 hover:bg-blue-100 border border-gray-300')" title="Última página">
+                <i class="fas fa-angle-double-right"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Estado Vacío -->
+      <div *ngIf="pedidosFiltrados.length === 0"
+        class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+        <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <i class="fas fa-shopping-cart text-gray-400 text-5xl"></i>
+        </div>
+        <h3 class="text-xl font-black text-gray-900 mb-2">
+          {{ terminoBusqueda || filtroEstado !== 'todos' ? 'No se encontraron pedidos' : 'No hay pedidos registrados' }}
+        </h3>
+        <p class="text-base text-gray-600 mb-6">
+          {{ terminoBusqueda || filtroEstado !== 'todos' ? 'Intenta ajustar los filtros de búsqueda' : 'Los pedidos
+          aparecerán aquí automáticamente' }}
+        </p>
+        <button *ngIf="terminoBusqueda || filtroEstado !== 'todos'"
+          (click)="limpiarBusqueda(); cambiarFiltroEstado('todos')"
+          class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition inline-flex items-center space-x-2">
+          <i class="fas fa-redo"></i>
+          <span>Ver Todos los Pedidos</span>
+        </button>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Modal de Detalle -->
+<div *ngIf="mostrarModal && pedidoSeleccionado" class="fixed inset-0 z-50 overflow-y-auto" (click)="cerrarModal()">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75"></div>
+
+    <div
+      class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+      (click)="$event.stopPropagation()">
+
+      <!-- Header -->
+      <div [class]="'px-4 py-3 ' + getEstadoColor(pedidoSeleccionado.estado)">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-2">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-white bg-opacity-50">
+              <i [class]="'fas text-lg ' + getEstadoIcono(pedidoSeleccionado.estado)"></i>
+            </div>
+            <div>
+              <h3 class="text-base font-black">Pedido #{{ pedidoSeleccionado.id }}</h3>
+              <p class="text-xs opacity-75">{{ formatearFechaCorta(pedidoSeleccionado.fecha_creacion) }}, {{
+                formatearHora(pedidoSeleccionado.fecha_creacion) }}</p>
+            </div>
+          </div>
+          <button (click)="cerrarModal()" class="hover:opacity-75 transition">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Contenido -->
+      <div class="p-4 max-h-[60vh] overflow-y-auto">
+        <!-- Información del Cliente -->
+        <div class="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+          <h4 class="text-xs font-bold text-gray-700 mb-2 flex items-center space-x-1">
+            <i class="fas fa-user text-sm"></i>
+            <span>Información del Cliente</span>
+          </h4>
+          <div class="space-y-1">
+            <div>
+              <span class="text-xs text-gray-500">Nombre:</span>
+              <p class="text-sm font-bold text-gray-900">{{ pedidoSeleccionado.nombre_cliente || 'Sin nombre' }}</p>
+            </div>
+            <div *ngIf="pedidoSeleccionado.telefono_cliente">
+              <span class="text-xs text-gray-500">Teléfono:</span>
+              <div class="flex items-center space-x-1 mt-0.5">
+                <i class="fab fa-whatsapp text-green-600 text-sm"></i>
+                <a [href]="'https://wa.me/' + formatearTelefono(pedidoSeleccionado.telefono_cliente)" target="_blank"
+                  class="text-xs text-green-600 hover:text-green-700 font-semibold">
+                  {{ formatearTelefono(pedidoSeleccionado.telefono_cliente) }}
+                </a>
+              </div>
+            </div>
+            <div *ngIf="!pedidoSeleccionado.telefono_cliente">
+              <span class="text-xs text-gray-500">Teléfono:</span>
+              <p class="text-sm text-gray-400">Sin teléfono</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estado Actual -->
+        <div class="mb-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+          <h4 class="text-xs font-bold text-gray-700 mb-2 flex items-center space-x-1">
+            <i class="fas fa-info-circle text-sm"></i>
+            <span>Estado del Pedido</span>
+          </h4>
+          <div class="flex items-center justify-between">
+            <span
+              [class]="'text-xs font-bold px-3 py-1 rounded-full border-2 flex items-center space-x-1 ' + getEstadoColor(pedidoSeleccionado.estado)">
+              <i [class]="'fas text-xs ' + getEstadoIcono(pedidoSeleccionado.estado)"></i>
+              <span>{{ getEstadoTexto(pedidoSeleccionado.estado) }}</span>
+            </span>
+            <button *ngIf="pedidoSeleccionado.estado === 'pendiente' || pedidoSeleccionado.estado === 'en_proceso'"
+              (click)="mostrarOpcionesEstado = !mostrarOpcionesEstado" [disabled]="actualizando"
+              class="bg-blue-600 text-white font-bold py-1 px-3 rounded-lg hover:bg-blue-700 transition text-xs disabled:opacity-50 disabled:cursor-not-allowed">
+              Cambiar Estado
+            </button>
+          </div>
+
+          <!-- Opciones de cambio de estado -->
+          <div *ngIf="mostrarOpcionesEstado" class="mt-2 space-y-1">
+            <button *ngIf="pedidoSeleccionado.estado === 'pendiente'"
+              (click)="actualizarEstado(pedidoSeleccionado.id, 'en_proceso')" [disabled]="actualizando"
+              class="w-full bg-blue-100 text-blue-800 font-bold py-1.5 px-3 rounded-lg hover:bg-blue-200 transition border border-blue-300 text-xs flex items-center justify-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed">
+              <i class="fas fa-sync text-xs"></i>
+              <span>En Proceso</span>
+            </button>
+            <button (click)="actualizarEstado(pedidoSeleccionado.id, 'entregado')" [disabled]="actualizando"
+              class="w-full bg-green-100 text-green-800 font-bold py-1.5 px-3 rounded-lg hover:bg-green-200 transition border border-green-300 text-xs flex items-center justify-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed">
+              <i class="fas fa-check-circle text-xs"></i>
+              <span>Entregado</span></button>
+            <button (click)="actualizarEstado(pedidoSeleccionado.id, 'cancelado')" [disabled]="actualizando"
+              class="w-full bg-red-100 text-red-800 font-bold py-1.5 px-3 rounded-lg hover:bg-red-200 transition border border-red-300 text-xs flex items-center justify-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed">
+              <i class="fas fa-times-circle text-xs"></i>
+              <span>Cancelar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Productos del Pedido -->
+        <div *ngIf="pedidoSeleccionado.items && pedidoSeleccionado.items.length > 0" class="mb-3">
+          <h4 class="text-xs font-bold text-gray-700 mb-2 flex items-center space-x-1">
+            <i class="fas fa-shopping-bag text-sm"></i>
+            <span>Productos ({{ pedidoSeleccionado.items.length }})</span>
+          </h4>
+          <div class="space-y-2">
+            <div *ngFor="let item of pedidoSeleccionado.items"
+              class="p-2 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2 flex-1">
+                  <div
+                    class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white flex-shrink-0">
+                    <i class="fas fa-box text-xs"></i>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-bold text-gray-900 truncate">{{ item.nombre }}</p>
+                    <p class="text-xs text-gray-500">{{ formatearPrecio(item.precio_unitario) }}</p>
+                  </div>
+                </div>
+                <div class="text-right ml-2">
+                  <span class="bg-blue-100 text-blue-800 font-bold px-2 py-0.5 rounded-full text-xs">
+                    × {{ item.cantidad }}
+                  </span>
+                  <p class="text-sm font-black text-gray-900 mt-0.5">{{ formatearPrecio(item.subtotal) }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mensaje si no hay productos -->
+        <div *ngIf="!pedidoSeleccionado.items || pedidoSeleccionado.items.length === 0"
+          class="mb-3 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+          <div class="flex items-center space-x-2">
+            <i class="fas fa-exclamation-triangle text-yellow-600 text-sm"></i>
+            <p class="text-xs text-yellow-800 font-semibold">
+              Este pedido no tiene productos asociados
+            </p>
+          </div>
+        </div>
+
+        <!-- Total del Pedido -->
+        <div class="p-3 bg-gradient-to-r from-green-50 to-green-100 rounded-lg border-2 border-green-300">
+          <div class="flex items-center justify-between">
+            <h4 class="text-sm font-bold text-gray-700">Total del Pedido</h4>
+            <span class="text-2xl font-black text-green-600">{{ formatearPrecio(pedidoSeleccionado.total) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-4 py-3 bg-gray-50 border-t border-gray-200">
+        <button (click)="cerrarModal()"
+          class="w-full bg-gray-600 text-white font-bold py-2 px-4 rounded-lg hover:bg-gray-700 transition text-sm">
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

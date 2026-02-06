@@ -1,0 +1,184 @@
+<!-- Navbar -->
+<nav class="fixed top-0 w-full bg-white/95 backdrop-blur-sm shadow-sm z-50">
+    <div class="container mx-auto px-4 py-4">
+        <div class="flex justify-between items-center">
+
+            <!-- Logo -->
+            <div class="flex items-center space-x-3">
+                <svg class="w-10 h-10" viewBox="0 0 50 50" fill="none">
+                    <rect width="50" height="50" rx="10" fill="#1e40af"/>
+                    <path d="M15 20 L25 15 L35 20 L35 35 L25 40 L15 35 Z" fill="#3b82f6"/>
+                    <circle cx="25" cy="25" r="6" fill="white"/>
+                    <path d="M25 22 L25 28 M22 25 L28 25" stroke="#1e40af" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+
+                <span class="text-2xl font-bold text-blue-900">FlowBot</span>
+            </div>
+
+            <!-- Auth Buttons -->
+            <div class="flex items-center space-x-4">
+                <a routerLink="/login" class="text-blue-600 font-semibold hover:text-blue-700 transition px-4 py-2">
+                    Iniciar Sesión
+                </a>
+                <a routerLink="/registro" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                    Registrarse
+                </a>
+            </div>
+
+        </div>
+    </div>
+</nav>
+
+<!-- Hero Section -->
+<section class="pt-32 pb-20 px-4">
+    <div class="container mx-auto max-w-6xl">
+        <div class="grid lg:grid-cols-2 gap-12 items-center">
+
+            <!-- Left Content -->
+            <div>
+                <h1 class="text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                    Gestiona tu <span class="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">WhatsApp</span> con automatización inteligente
+                </h1>
+
+                <p class="text-xl text-gray-600 mb-8 leading-relaxed">
+                    Plataforma diseñada para PyMEs que buscan profesionalizar su atención al cliente. Configura respuestas automáticas, gestiona conversaciones y mejora tu servicio usando N8N.
+                </p>
+
+                <!-- CTA Button -->
+                <div>
+                    <a routerLink="/registro" class="inline-block bg-blue-600 text-white font-bold px-8 py-4 rounded-xl hover:bg-blue-700 transition text-lg shadow-lg">
+                        Comenzar Gratis
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right Illustration -->
+            <div>
+                <svg viewBox="0 0 600 600" class="w-full h-auto drop-shadow-2xl" xmlns="http://www.w3.org/2000/svg">
+
+                    <defs>
+                        <linearGradient id="blueGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#1e40af;stop-opacity:1" />
+                        </linearGradient>
+
+                        <linearGradient id="lightBlue" x1="0%" y1="0%" x2="0%" y2="100%">
+                            <stop offset="0%" style="stop-color:#dbeafe;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#bfdbfe;stop-opacity:1" />
+                        </linearGradient>
+
+                        <filter id="shadow">
+                            <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.2"/>
+                        </filter>
+                    </defs>
+
+                    <!-- Background Circle -->
+                    <circle cx="300" cy="300" r="250" fill="url(#lightBlue)" opacity="0.3"/>
+
+                    <!-- Phone Mockup -->
+                    <g filter="url(#shadow)">
+                        <rect x="180" y="80" width="240" height="480" rx="30" fill="white" stroke="#e5e7eb" stroke-width="4"/>
+                        <rect x="195" y="100" width="210" height="440" rx="20" fill="#f9fafb"/>
+
+                        <!-- WhatsApp Header -->
+                        <rect x="195" y="100" width="210" height="60" rx="20" fill="url(#blueGrad)"/>
+                        <circle cx="225" cy="130" r="15" fill="white" opacity="0.9"/>
+                        <rect x="250" y="120" width="120" height="10" rx="5" fill="white" opacity="0.9"/>
+                        <rect x="250" y="135" width="80" height="6" rx="3" fill="white" opacity="0.7"/>
+
+                        <!-- Chat Messages -->
+                        <rect x="210" y="180" width="150" height="50" rx="15" fill="#3b82f6" opacity="0.9"/>
+                        <rect x="220" y="192" width="100" height="8" rx="4" fill="white" opacity="0.9"/>
+                        <rect x="220" y="205" width="120" height="8" rx="4" fill="white" opacity="0.9"/>
+                        <rect x="220" y="218" width="80" height="8" rx="4" fill="white" opacity="0.9"/>
+
+                        <rect x="240" y="245" width="150" height="50" rx="15" fill="#e5e7eb"/>
+                        <rect x="250" y="257" width="110" height="8" rx="4" fill="#6b7280"/>
+                        <rect x="250" y="270" width="90" height="8" rx="4" fill="#6b7280"/>
+                        <rect x="250" y="283" width="120" height="8" rx="4" fill="#6b7280"/>
+
+                        <rect x="210" y="310" width="160" height="60" rx="15" fill="#3b82f6" opacity="0.9"/>
+                        <rect x="220" y="325" width="100" height="8" rx="4" fill="white" opacity="0.9"/>
+                        <rect x="220" y="338" width="130" height="8" rx="4" fill="white" opacity="0.9"/>
+                        <rect x="220" y="351" width="90" height="8" rx="4" fill="white" opacity="0.9"/>
+
+                        <rect x="210" y="385" width="100" height="35" rx="15" fill="#e5e7eb"/>
+                        <circle cx="235" cy="402" r="5" fill="#6b7280"/>
+                        <circle cx="255" cy="402" r="5" fill="#6b7280"/>
+                        <circle cx="275" cy="402" r="5" fill="#6b7280"/>
+
+                        <rect x="195" y="490" width="210" height="50" fill="white"/>
+                        <rect x="210" y="503" width="150" height="24" rx="12" fill="#f3f4f6" stroke="#e5e7eb"/>
+                        <circle cx="375" cy="515" r="12" fill="url(#blueGrad)"/>
+                    </g>
+
+                    <!-- N8N Icon -->
+                    <g filter="url(#shadow)">
+                        <circle cx="480" cy="250" r="70" fill="white"/>
+                        <circle cx="480" cy="250" r="65" fill="#ea4b71" opacity="0.1"/>
+                        <rect x="450" y="230" width="60" height="40" rx="8" fill="#ea4b71"/>
+                        <text x="465" y="255" font-size="20" font-weight="bold" fill="white">N8N</text>
+                    </g>
+
+                    <!-- Floating Icons -->
+                    <g opacity="0.8">
+                        <circle cx="120" cy="200" r="35" fill="#dbeafe"/>
+                        <text x="103" y="210" font-size="28">⚡</text>
+                    </g>
+
+                    <g opacity="0.8">
+                        <circle cx="500" cy="450" r="35" fill="#dbeafe"/>
+                        <text x="483" y="460" font-size="28">💬</text>
+                    </g>
+
+                    <g opacity="0.8">
+                        <circle cx="100" cy="450" r="35" fill="#dbeafe"/>
+                        <text x="83" y="460" font-size="28">🤖</text>
+                    </g>
+
+                </svg>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section id="features" class="py-20 bg-gradient-to-b from-white to-blue-50 px-4">
+    <div class="container mx-auto max-w-6xl">
+        <div class="text-center mb-16">
+            <h2 class="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+                Beneficios de <span class="bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">FlowBot</span>
+            </h2>
+            <p class="text-xl text-gray-600">Simplifica la gestión de tu WhatsApp empresarial</p>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-8">
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition">
+                <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-cogs text-3xl text-blue-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">Automatización de Procesos</h3>
+                <p class="text-gray-600">Configura flujos automatizados con N8N para gestionar tus conversaciones sin intervención manual.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition">
+                <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-building text-3xl text-blue-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">Multi-Empresa</h3>
+                <p class="text-gray-600">Gestiona múltiples negocios desde una sola cuenta.</p>
+            </div>
+
+            <div class="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition">
+                <div class="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-6">
+                    <i class="fas fa-comments text-3xl text-blue-600"></i>
+                </div>
+                <h3 class="text-xl font-bold text-gray-900 mb-3">Respuestas Automáticas</h3>
+                <p class="text-gray-600">Atiende a tus clientes 24/7 con respuestas inteligentes.</p>
+            </div>
+
+        </div>
+    </div>
+</section>

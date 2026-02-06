@@ -1,0 +1,121 @@
+<!-- catalogos-universal-final.html -->
+
+<!-- Loading State -->
+<div *ngIf="cargando" class="flex items-center justify-center h-screen bg-gray-50">
+  <div class="text-center">
+    <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
+    <p class="text-gray-600 font-semibold">Cargando catálogo...</p>
+  </div>
+</div>
+
+<!-- Main Layout with Sidebar -->
+<div *ngIf="!cargando" class="flex h-screen overflow-hidden bg-gray-50">
+
+  <!-- Sidebar Component -->
+  <app-sidebar
+    [sidebarOpen]="sidebarOpen"
+    [empresa]="empresa"
+    [usuario]="usuario"
+    [currentRoute]="currentRoute"
+    [unreadMessages]="0"
+    (navigate)="handleNavigation($event)"
+    (logout)="handleLogout()">
+  </app-sidebar>
+
+  <!-- Main Content Area -->
+  <div class="flex-1 flex flex-col overflow-hidden">
+
+    <!-- Header Component with Filters and Search (AGREGADO productosHabilitados y serviciosHabilitados) -->
+    <app-header-catalogo
+      [terminoBusqueda]="terminoBusqueda"
+      [filtroTipo]="filtroTipo"
+      [filtroCategoria]="filtroCategoria"
+      [filtroDisponible]="filtroDisponible"
+      [ordenamiento]="ordenamiento"
+      [categoriasDisponibles]="categoriasDisponibles"
+      [sidebarOpen]="sidebarOpen"
+      [empresaId]="empresaId"
+      [productosHabilitados]="productosHabilitados"
+      [serviciosHabilitados]="serviciosHabilitados"
+      (toggleSidebarEvent)="toggleSidebar()"
+      (mostrarModalTipoEvent)="mostrarModalTipo()"
+      (buscarEvent)="buscar()"
+      (limpiarBusquedaEvent)="limpiarBusqueda()"
+      (cambiarFiltroTipoEvent)="cambiarFiltroTipo($event)"
+      (cambiarFiltroCategoriaEvent)="cambiarFiltroCategoria($event)"
+      (cambiarFiltroDisponibleEvent)="cambiarFiltroDisponible($event)"
+      (cambiarOrdenamientoEvent)="cargarCatalogo()"
+      (terminoBusquedaChange)="terminoBusqueda = $event">
+    </app-header-catalogo>
+
+    <!-- Content Area with Scroll -->
+    <main class="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6">
+      <!-- Mensaje de notificación -->
+      <div *ngIf="mensaje.mostrar"
+           [class]="'mb-6 p-4 rounded-lg border flex items-center justify-between ' +
+                    (mensaje.tipo === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200')">
+        <div class="flex items-center space-x-3">
+          <i [class]="'fas ' + (mensaje.tipo === 'success' ? 'fa-check-circle text-green-600' : 'fa-exclamation-circle text-red-600')"></i>
+          <span [class]="'font-semibold text-sm ' + (mensaje.tipo === 'success' ? 'text-green-800' : 'text-red-800')">
+            {{ mensaje.texto }}
+          </span>
+        </div>
+        <button (click)="cerrarMensaje()" class="text-gray-500 hover:text-gray-700">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Grid Component with Products -->
+      <app-grid-catalogo
+        [itemsPaginados]="itemsPaginados"
+        [itemsFiltrados]="itemsFiltrados"
+        [paginaActual]="paginaActual"
+        [totalPaginas]="totalPaginas"
+        [rangoItems]="rangoItems"
+        [terminoBusqueda]="terminoBusqueda"
+        [productosHabilitados]="productosHabilitados"
+        [serviciosHabilitados]="serviciosHabilitados"
+        (editarItemEvent)="abrirModalEditar($event)"
+        (eliminarItemEvent)="eliminarItem($event)"
+        (cambiarPaginaEvent)="cambiarPagina($event)"
+        (limpiarBusquedaEvent)="limpiarBusqueda()"
+        (mostrarModalTipoEvent)="mostrarModalTipo()">
+      </app-grid-catalogo>
+    </main>
+  </div>
+</div>
+
+<!-- Modal de Selección de Tipo Component -->
+<app-modal-seleccion-tipo
+  [mostrarModal]="mostrarModalSeleccionTipo"
+  [productosHabilitados]="productosHabilitados"
+  [serviciosHabilitados]="serviciosHabilitados"
+  (cerrarModalEvent)="cerrarModalTipo()"
+  (seleccionarTipoEvent)="seleccionarTipo($event)">
+</app-modal-seleccion-tipo>
+
+<!-- Modal de Creación/Edición Component -->
+<app-modal-agregar
+  [mostrarModal]="mostrarModal"
+  [modoEdicion]="modoEdicion"
+  [itemActual]="itemActual"
+  [categoriasDisponibles]="categoriasDisponibles"
+  [guardando]="guardando"
+  [imagenPreview]="imagenPreview"
+  [productosHabilitados]="productosHabilitados"
+  [serviciosHabilitados]="serviciosHabilitados"
+  (cerrarModalEvent)="cerrarModal()"
+  (guardarItemEvent)="guardarItem()"
+  (onFileSelectedEvent)="onFileSelected($event)"
+  (eliminarImagenActualEvent)="eliminarImagenActual()"
+  (cancelarImagenNuevaEvent)="cancelarImagenNueva()"
+  (abrirSelectorArchivoEvent)="abrirSelectorArchivo()">
+</app-modal-agregar>
+
+<!-- Input oculto para seleccionar archivos -->
+<input
+  type="file"
+  #fileInput
+  accept="image/*"
+  (change)="onFileSelected($event)"
+  class="hidden">

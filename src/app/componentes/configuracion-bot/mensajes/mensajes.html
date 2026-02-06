@@ -1,0 +1,139 @@
+<!-- Header con Búsqueda y Botón -->
+<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+  <div class="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
+    <div class="flex-1 w-full lg:w-auto">
+      <div class="relative">
+        <i class="fas fa-search absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+        <input type="text"
+          [ngModel]="searchTerm"
+          (ngModelChange)="onSearchChange($event)"
+          placeholder="Buscar respuestas automáticas..."
+          class="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+      </div>
+    </div>
+
+    <button (click)="onCrearClick()"
+      class="w-full lg:w-auto bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition flex items-center justify-center space-x-2">
+      <i class="fas fa-plus"></i>
+      <span>Nueva Respuesta</span>
+    </button>
+  </div>
+</div>
+
+<!-- TABLA DE RESPUESTAS -->
+<div *ngIf="!loadingRespuestas && filteredRespuestas.length > 0" class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+  <div class="overflow-x-auto">
+    <table class="w-full">
+      <!-- Header de la tabla -->
+      <thead class="bg-gradient-to-r from-green-600 to-emerald-600 text-white">
+        <tr>
+          <th class="px-6 py-4 text-left text-sm font-black uppercase tracking-wider">
+            <i class="fas fa-tag mr-2"></i>
+            Tipo
+          </th>
+          <th class="px-6 py-4 text-left text-sm font-black uppercase tracking-wider">
+            <i class="fas fa-bullseye mr-2"></i>
+            Disparador
+          </th>
+          <th class="px-6 py-4 text-left text-sm font-black uppercase tracking-wider">
+            <i class="fas fa-comment-alt mr-2"></i>
+            Respuesta
+          </th>
+          <th class="px-6 py-4 text-right text-sm font-black uppercase tracking-wider">
+            <i class="fas fa-cogs mr-2"></i>
+            Acciones
+          </th>
+        </tr>
+      </thead>
+
+      <tbody class="divide-y divide-gray-200">
+        <tr *ngFor="let respuesta of filteredRespuestas"
+            class="hover:bg-green-50 transition">
+          <!-- Tipo -->
+          <td class="px-6 py-4">
+            <div class="flex items-center">
+              <div class="w-12 h-12 rounded-lg flex items-center justify-center mr-3"
+                   [ngClass]="{
+                     'bg-blue-100': respuesta.tipo_respuesta === 'texto',
+                     'bg-purple-100': respuesta.tipo_respuesta === 'imagen',
+                     'bg-red-100': respuesta.tipo_respuesta === 'documento',
+                     'bg-green-100': respuesta.tipo_respuesta === 'enlace'
+                   }">
+                <i [class]="'fas ' + getTipoIcono(respuesta.tipo_respuesta) + ' text-2xl'"
+                   [ngClass]="{
+                     'text-blue-600': respuesta.tipo_respuesta === 'texto',
+                     'text-purple-600': respuesta.tipo_respuesta === 'imagen',
+                     'text-red-600': respuesta.tipo_respuesta === 'documento',
+                     'text-green-600': respuesta.tipo_respuesta === 'enlace'
+                   }"></i>
+              </div>
+              <span class="font-bold text-gray-900 capitalize">{{ respuesta.tipo_respuesta }}</span>
+            </div>
+          </td>
+
+          <!-- Disparador -->
+          <td class="px-6 py-4">
+            <div class="bg-yellow-100 border-2 border-yellow-400 rounded-lg px-4 py-2 inline-block">
+              <i class="fas fa-bolt text-yellow-600 mr-2"></i>
+              <span class="font-black text-gray-900">"{{ respuesta.texto_disparador }}"</span>
+            </div>
+          </td>
+
+          <!-- Respuesta -->
+          <td class="px-6 py-4">
+            <div class="bg-gray-50 border-l-4 border-green-500 rounded-lg p-3">
+              <p class="text-gray-800 text-sm line-clamp-2">{{ respuesta.respuesta }}</p>
+            </div>
+          </td>
+
+          <!-- Acciones -->
+          <td class="px-6 py-4 text-right">
+            <div class="flex justify-end space-x-2">
+              <button (click)="onEditarClick(respuesta)"
+                class="bg-blue-100 text-blue-700 font-bold px-4 py-2 rounded-lg hover:bg-blue-200 transition flex items-center space-x-1">
+                <i class="fas fa-edit"></i>
+                <span>Editar</span>
+              </button>
+              <button (click)="onEliminarClick(respuesta)"
+                class="bg-red-100 text-red-700 font-bold px-4 py-2 rounded-lg hover:bg-red-200 transition flex items-center space-x-1">
+                <i class="fas fa-trash"></i>
+                <span>Eliminar</span>
+              </button>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Empty State -->
+<div *ngIf="!loadingRespuestas && filteredRespuestas.length === 0 && !searchTerm"
+  class="bg-white rounded-xl shadow-sm border-2 border-dashed border-gray-300 p-12 text-center">
+  <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+    <i class="fas fa-comments text-gray-400 text-4xl"></i>
+  </div>
+  <h3 class="text-2xl font-black text-gray-900 mb-2">No hay respuestas automáticas</h3>
+  <p class="text-gray-600 mb-6">Crea tu primera respuesta automática para automatizar conversaciones</p>
+  <button (click)="onCrearClick()"
+    class="bg-gradient-to-r from-green-600 to-emerald-600 text-white font-bold py-3 px-8 rounded-lg hover:shadow-lg transition inline-flex items-center space-x-2">
+    <i class="fas fa-plus"></i>
+    <span>Crear Primera Respuesta</span>
+  </button>
+</div>
+
+<!-- No Results -->
+<div *ngIf="!loadingRespuestas && filteredRespuestas.length === 0 && searchTerm"
+  class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+  <i class="fas fa-search text-gray-300 text-6xl mb-4"></i>
+  <h3 class="text-xl font-black text-gray-900 mb-2">No se encontraron resultados</h3>
+  <p class="text-gray-600">No hay respuestas que coincidan con "{{ searchTerm }}"</p>
+</div>
+
+<!-- Loading State -->
+<div *ngIf="loadingRespuestas" class="flex items-center justify-center py-12">
+  <div class="text-center">
+    <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mb-3"></div>
+    <p class="text-gray-600">Cargando respuestas...</p>
+  </div>
+</div>

@@ -1,0 +1,160 @@
+<!-- modal-seleccion-tipo.html -->
+<div *ngIf="mostrarModal"
+     class="fixed inset-0 z-50 overflow-y-auto"
+     (click)="cerrarModal()">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75"></div>
+
+    <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+         (click)="stopPropagation($event)">
+
+      <div class="bg-gradient-to-r from-blue-600 to-indigo-600 px-4 sm:px-6 py-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg sm:text-xl font-black text-white flex items-center space-x-2">
+            <i class="fas fa-plus-circle"></i>
+            <span>¿Qué deseas agregar?</span>
+          </h3>
+          <button (click)="cerrarModal()" class="text-white hover:text-gray-200 transition">
+            <i class="fas fa-times text-xl sm:text-2xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-4 sm:p-6">
+        <p class="text-sm sm:text-base text-gray-600 mb-3 text-center">Selecciona el tipo de item que quieres agregar</p>
+
+        <!-- ADVERTENCIA SI AMBOS TIPOS ESTÁN DESHABILITADOS -->
+        <div *ngIf="!productosHabilitados && !serviciosHabilitados" class="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-r-lg">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-bold text-red-900 mb-1">⚠️ No hay tipos habilitados</p>
+              <p class="text-xs sm:text-sm text-red-800 leading-relaxed">
+                Tanto los productos como los servicios están deshabilitados. Por favor, habilita al menos uno en la configuración de tu empresa.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- TEXTO INFORMATIVO -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6 rounded-r-lg">
+          <div class="flex items-start">
+            <div class="flex-shrink-0">
+              <i class="fas fa-info-circle text-blue-500 text-xl mt-0.5"></i>
+            </div>
+            <div class="ml-3">
+              <p class="text-sm font-semibold text-blue-900 mb-1">💡 Consejo importante</p>
+              <p class="text-xs sm:text-sm text-blue-800 leading-relaxed">
+                <strong>¿Vendes productos físicos?</strong> Agrega solo <strong class="text-green-700">Productos</strong>.<br>
+                <strong>¿Ofreces servicios profesionales?</strong> Agrega solo <strong class="text-purple-700">Servicios</strong>.<br>
+                <span class="text-blue-700">Mantén tu catálogo organizado según tu tipo de negocio.</span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 sm:gap-4">
+          <!-- BOTÓN PRODUCTO -->
+          <button
+            (click)="seleccionarTipo('producto')"
+            [disabled]="!productosHabilitados"
+            [class]="productosHabilitados ?
+              'group bg-gradient-to-br from-green-50 to-green-100 border-2 border-green-200 rounded-xl p-4 sm:p-8 hover:shadow-lg hover:border-green-400 transition-all transform hover:-translate-y-1' :
+              'group bg-gray-100 border-2 border-gray-300 rounded-xl p-4 sm:p-8 cursor-not-allowed opacity-50 relative'">
+
+            <!-- Badge de deshabilitado -->
+            <div *ngIf="!productosHabilitados" class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+              <i class="fas fa-ban mr-1"></i>Deshabilitado
+            </div>
+
+            <div class="flex flex-col items-center text-center space-y-2 sm:space-y-4">
+              <div [class]="productosHabilitados ?
+                'w-12 h-12 sm:w-16 sm:h-16 bg-green-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform' :
+                'w-12 h-12 sm:w-16 sm:h-16 bg-gray-400 rounded-xl flex items-center justify-center'">
+                <i [class]="productosHabilitados ?
+                  'fas fa-box text-white text-2xl sm:text-3xl' :
+                  'fas fa-box text-gray-300 text-2xl sm:text-3xl'"></i>
+              </div>
+              <div>
+                <h4 [class]="productosHabilitados ?
+                  'text-base sm:text-lg font-black text-gray-900 mb-1' :
+                  'text-base sm:text-lg font-black text-gray-500 mb-1'">
+                  Producto
+                </h4>
+                <p [class]="productosHabilitados ?
+                  'text-xs text-gray-600' :
+                  'text-xs text-gray-400'">
+                  Artículos físicos para venta
+                </p>
+              </div>
+              <div [class]="productosHabilitados ?
+                'w-full pt-3 border-t border-green-200' :
+                'w-full pt-3 border-t border-gray-300'">
+                <span [class]="productosHabilitados ?
+                  'text-xs font-semibold text-green-700' :
+                  'text-xs font-semibold text-gray-500'">
+                  📦 Inventario físico
+                </span>
+              </div>
+            </div>
+          </button>
+
+          <!-- BOTÓN SERVICIO -->
+          <button
+            (click)="seleccionarTipo('servicio')"
+            [disabled]="!serviciosHabilitados"
+            [class]="serviciosHabilitados ?
+              'group bg-gradient-to-br from-purple-50 to-purple-100 border-2 border-purple-200 rounded-xl p-4 sm:p-8 hover:shadow-lg hover:border-purple-400 transition-all transform hover:-translate-y-1' :
+              'group bg-gray-100 border-2 border-gray-300 rounded-xl p-4 sm:p-8 cursor-not-allowed opacity-50 relative'">
+
+            <!-- Badge de deshabilitado -->
+            <div *ngIf="!serviciosHabilitados" class="absolute top-2 right-2 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+              <i class="fas fa-ban mr-1"></i>Deshabilitado
+            </div>
+
+            <div class="flex flex-col items-center text-center space-y-2 sm:space-y-4">
+              <div [class]="serviciosHabilitados ?
+                'w-12 h-12 sm:w-16 sm:h-16 bg-purple-600 rounded-xl flex items-center justify-center group-hover:scale-110 transition-transform' :
+                'w-12 h-12 sm:w-16 sm:h-16 bg-gray-400 rounded-xl flex items-center justify-center'">
+                <i [class]="serviciosHabilitados ?
+                  'fas fa-tools text-white text-2xl sm:text-3xl' :
+                  'fas fa-tools text-gray-300 text-2xl sm:text-3xl'"></i>
+              </div>
+              <div>
+                <h4 [class]="serviciosHabilitados ?
+                  'text-base sm:text-lg font-black text-gray-900 mb-1' :
+                  'text-base sm:text-lg font-black text-gray-500 mb-1'">
+                  Servicio
+                </h4>
+                <p [class]="serviciosHabilitados ?
+                  'text-xs text-gray-600' :
+                  'text-xs text-gray-400'">
+                  Servicios profesionales
+                </p>
+              </div>
+              <div [class]="serviciosHabilitados ?
+                'w-full pt-3 border-t border-purple-200' :
+                'w-full pt-3 border-t border-gray-300'">
+                <span [class]="serviciosHabilitados ?
+                  'text-xs font-semibold text-purple-700' :
+                  'text-xs font-semibold text-gray-500'">
+                  ⚙️ Trabajo o consultoría
+                </span>
+              </div>
+            </div>
+          </button>
+        </div>
+
+        <!-- MENSAJE DE AYUDA -->
+        <div *ngIf="!productosHabilitados || !serviciosHabilitados" class="mt-4 text-center">
+          <p class="text-xs text-gray-600">
+            <i class="fas fa-cog mr-1"></i>
+            Para habilitar tipos desactivados, ve a <strong>Configuración de Empresa</strong>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

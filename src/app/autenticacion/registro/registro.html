@@ -1,0 +1,426 @@
+<div class="min-h-screen flex flex-col lg:flex-row bg-white">
+  <!-- Left Side - Form Section -->
+  <div class="w-full lg:w-1/2 flex flex-col">
+    <!-- Header con logo -->
+    <header class="py-6 px-6 sm:px-8 bg-gradient-to-br from-blue-50 to-indigo-50 lg:bg-white">
+      <a routerLink="/" class="cursor-pointer flex items-center">
+        <svg class="w-8 h-8 sm:w-10 sm:h-10" viewBox="0 0 50 50" fill="none">
+          <rect width="50" height="50" rx="10" fill="#1e40af"/>
+          <path d="M15 20 L25 15 L35 20 L35 35 L25 40 L15 35 Z" fill="#3b82f6"/>
+          <circle cx="25" cy="25" r="6" fill="white"/>
+          <path d="M25 22 L25 28 M22 25 L28 25" stroke="#1e40af" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="ml-3 text-2xl sm:text-3xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-wide">
+          FlowBot
+        </div>
+      </a>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col items-center justify-center px-6 sm:px-8 lg:px-12 xl:px-20 py-6 lg:py-8">
+      <div class="w-full max-w-md space-y-3 sm:space-y-4">
+
+        <!-- Progress Bar con 3 pasos -->
+        <div class="mb-4">
+          <div class="flex items-center justify-between">
+            <!-- Step 1 -->
+            <div class="flex items-center flex-1">
+              <div [class]="'w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs z-10 ' + getStepCircleClass(1)">
+                <span *ngIf="!isStepComplete(1)">1</span>
+                <i *ngIf="isStepComplete(1)" class="fas fa-check text-xs"></i>
+              </div>
+              <div class="flex-1 h-1 bg-gray-200 -ml-3.5 pl-3.5">
+                <div class="h-full bg-blue-600 transition-all duration-300" [style.width.%]="currentStep >= 2 ? 100 : 0"></div>
+              </div>
+            </div>
+
+            <!-- Step 2 -->
+            <div class="flex items-center flex-1">
+              <div [class]="'w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs z-10 ' + getStepCircleClass(2)">
+                <span *ngIf="!isStepComplete(2)">2</span>
+                <i *ngIf="isStepComplete(2)" class="fas fa-check text-xs"></i>
+              </div>
+              <div class="flex-1 h-1 bg-gray-200 -ml-3.5 pl-3.5">
+                <div class="h-full bg-blue-600 transition-all duration-300" [style.width.%]="currentStep >= 3 ? 100 : 0"></div>
+              </div>
+            </div>
+
+            <!-- Step 3 -->
+            <div class="flex items-center">
+              <div [class]="'w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs z-10 ' + getStepCircleClass(3)">
+                <span *ngIf="!isStepComplete(3)">3</span>
+                <i *ngIf="isStepComplete(3)" class="fas fa-check text-xs"></i>
+              </div>
+            </div>
+          </div>
+          <div class="flex justify-between mt-1.5">
+            <span [class]="'text-xs font-semibold ' + getStepTextClass(1)">Datos</span>
+            <span [class]="'text-xs font-semibold ' + getStepTextClass(2)">Empresa</span>
+            <span [class]="'text-xs font-semibold ' + getStepTextClass(3)">WhatsApp</span>
+          </div>
+        </div>
+
+        <!-- Título y subtítulo -->
+        <div class="text-center lg:text-left space-y-1.5">
+          <h1 class="text-2xl sm:text-3xl text-gray-900 font-black">
+            {{ getMainTitle() }}
+          </h1>
+          <p class="text-gray-500 text-sm sm:text-base font-medium">
+            {{ getMainSubtitle() }}
+          </p>
+        </div>
+
+        <!-- Mensaje de Respuesta -->
+        <div *ngIf="showMessage"
+             [class]="'p-4 rounded-lg flex items-start gap-3 ' + (messageType === 'success' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200')">
+          <i [class]="'mt-0.5 text-lg ' + (messageType === 'success' ? 'fas fa-check-circle text-green-500' : 'fas fa-exclamation-circle text-red-500')"></i>
+          <p [class]="'text-sm font-semibold flex-1 ' + (messageType === 'success' ? 'text-green-800' : 'text-red-800')">
+            {{ messageText }}
+          </p>
+          <button (click)="closeMessage()" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Step 1: Datos Personales -->
+        <form *ngIf="currentStep === 1" [formGroup]="step1Form" (ngSubmit)="submitStep1()" class="space-y-3">
+          <div class="space-y-1.5">
+            <label class="block text-sm font-bold text-gray-700">
+              <i class="fas fa-user text-blue-600 mr-2"></i>Nombre Completo
+            </label>
+            <input type="text" formControlName="nombre_usuario"
+              class="w-full text-sm py-2.5 px-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              placeholder="Juan Pérez García">
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-sm font-bold text-gray-700">
+              <i class="fas fa-envelope text-blue-600 mr-2"></i>Correo Electrónico
+            </label>
+            <input type="email" formControlName="correo_usuario"
+              class="w-full text-sm py-2.5 px-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              placeholder="tu@email.com">
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-sm font-bold text-gray-700">
+              <i class="fas fa-phone text-blue-600 mr-2"></i>Teléfono
+            </label>
+            <input type="tel" formControlName="telefono_usuario"
+              class="w-full text-sm py-2.5 px-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              placeholder="+52 612 123 4567">
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-sm font-bold text-gray-700">
+              <i class="fas fa-lock text-blue-600 mr-2"></i>Contraseña
+            </label>
+            <div class="relative">
+              <input [type]="showPassword ? 'text' : 'password'" formControlName="contraseña_usuario"
+                class="w-full text-sm py-2.5 px-4 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                placeholder="Mínimo 6 caracteres">
+              <button type="button" (click)="togglePassword()"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+            <p class="text-xs text-gray-500">Usa al menos 6 caracteres</p>
+          </div>
+
+          <div class="pt-1">
+            <button type="submit" [disabled]="!step1Form.valid"
+              class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 w-full rounded-xl font-bold text-base hover:shadow-xl transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span class="flex items-center justify-center gap-2">
+                Continuar
+                <i class="fas fa-arrow-right"></i>
+              </span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Step 2: Datos de Empresa -->
+        <form *ngIf="currentStep === 2" [formGroup]="step2Form" (ngSubmit)="submitStep2()" class="space-y-3">
+          <div class="space-y-1.5">
+            <label class="block text-sm font-bold text-gray-700">
+              <i class="fas fa-store text-blue-600 mr-2"></i>Nombre de la Empresa
+            </label>
+            <input type="text" formControlName="nombre_empresa"
+              class="w-full text-sm py-2.5 px-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              placeholder="Mi Empresa S.A. de C.V.">
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-sm font-bold text-gray-700">
+              <i class="fas fa-envelope text-blue-600 mr-2"></i>Correo de la Empresa
+            </label>
+            <input type="email" formControlName="correo_empresa"
+              class="w-full text-sm py-2.5 px-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              placeholder="contacto@miempresa.com">
+          </div>
+
+          <div class="space-y-1.5">
+            <label class="block text-sm font-bold text-gray-700">
+              <i class="fas fa-phone-office text-blue-600 mr-2"></i>Número de la Empresa
+            </label>
+            <input type="tel" formControlName="telefono_empresa"
+              class="w-full text-sm py-2.5 px-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              placeholder="+52 612 987 6543">
+          </div>
+
+          <div class="pt-1 flex gap-3">
+            <button type="button" (click)="volverStep1()"
+              class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-xl hover:bg-gray-300 transition-all">
+              <i class="fas fa-arrow-left mr-2"></i>Atrás
+            </button>
+            <button type="submit" [disabled]="!step2Form.valid || isSubmitting"
+              class="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-6 rounded-xl hover:shadow-xl transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed">
+              <span class="flex items-center justify-center gap-2">
+                <span *ngIf="!isSubmitting">Continuar</span>
+                <span *ngIf="isSubmitting">Creando cuenta...</span>
+                <i *ngIf="!isSubmitting" class="fas fa-arrow-right"></i>
+                <i *ngIf="isSubmitting" class="fas fa-spinner fa-spin"></i>
+              </span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Step 3a: Verificación de Email -->
+        <div *ngIf="currentStep === 3 && verificacionEmailPendiente" class="space-y-6">
+          <div class="text-center py-8">
+            <div class="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-envelope text-5xl text-blue-600"></i>
+            </div>
+            <h3 class="text-2xl font-black text-gray-900 mb-2">Verifica tu correo</h3>
+            <p class="text-gray-600 mb-6">
+              Hemos enviado un enlace de verificación a:<br>
+              <strong class="text-blue-600">{{ datosUsuario.correo_usuario }}</strong>
+            </p>
+          </div>
+
+          <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+            <div class="flex gap-3">
+              <i class="fas fa-exclamation-triangle text-yellow-600 mt-1"></i>
+              <div class="flex-1">
+                <p class="font-bold text-yellow-800 mb-1">Verifica tu correo para continuar</p>
+                <p class="text-sm text-yellow-700">
+                  Debes verificar tu correo electrónico antes de poder conectar WhatsApp.
+                  Revisa tu bandeja de entrada y la carpeta de spam.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+            <h4 class="font-bold text-gray-900 mb-2 flex items-center gap-2">
+              <i class="fas fa-info-circle text-blue-600"></i>
+              ¿No recibiste el correo?
+            </h4>
+            <ul class="text-sm text-gray-700 space-y-1 ml-6 list-disc">
+              <li>Revisa tu carpeta de spam o correo no deseado</li>
+              <li>Verifica que el correo sea correcto</li>
+              <li>Espera unos minutos, puede tardar en llegar</li>
+            </ul>
+          </div>
+
+          <div class="space-y-3">
+            <button type="button" (click)="reenviarVerificacion()" [disabled]="isSubmitting"
+              class="w-full bg-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+              <i [class]="isSubmitting ? 'fas fa-spinner fa-spin mr-2' : 'fas fa-paper-plane mr-2'"></i>
+              {{ isSubmitting ? 'Enviando...' : 'Reenviar correo de verificación' }}
+            </button>
+
+            <button type="button" (click)="volverStep2()"
+              class="w-full bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-xl hover:bg-gray-300 transition-all">
+              <i class="fas fa-arrow-left mr-2"></i>Volver atrás
+            </button>
+          </div>
+
+          <!-- Indicador de verificación automática -->
+          <div class="text-center">
+            <div class="inline-flex items-center gap-2 text-sm text-gray-600">
+              <div class="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full"></div>
+              <span>Verificando automáticamente...</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3b: Conexión WhatsApp con QR -->
+        <div *ngIf="currentStep === 3 && !verificacionEmailPendiente" class="space-y-6">
+          <!-- Estado: Generando QR -->
+          <div *ngIf="isGeneratingQR" class="text-center py-8">
+            <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4"></div>
+            <p class="text-gray-600 font-semibold">Generando código QR...</p>
+          </div>
+
+          <!-- Estado: QR Generado - Esperando Escaneo -->
+          <div *ngIf="!isGeneratingQR && qrCode && !whatsappConnected" class="space-y-4">
+            <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl p-6">
+              <div class="bg-white rounded-xl p-6 shadow-lg mb-4">
+                <img [src]="qrCode" alt="QR Code" class="w-full max-w-xs mx-auto">
+              </div>
+
+              <div class="text-center space-y-3">
+                <div class="flex items-center justify-center gap-2 text-blue-600">
+                  <div class="animate-pulse h-2 w-2 bg-blue-600 rounded-full"></div>
+                  <p class="text-sm font-semibold">Esperando escaneo...</p>
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <h4 class="font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <i class="fas fa-info-circle text-blue-600"></i>
+                Cómo conectar WhatsApp
+              </h4>
+              <ol class="text-sm text-gray-700 space-y-2 ml-6 list-decimal">
+                <li>Abre WhatsApp en tu teléfono</li>
+                <li>Ve a <strong>Menú</strong> o <strong>Configuración</strong></li>
+                <li>Toca <strong>Dispositivos vinculados</strong></li>
+                <li>Toca <strong>Vincular un dispositivo</strong></li>
+                <li>Escanea este código QR con tu teléfono</li>
+              </ol>
+            </div>
+
+            <div class="flex gap-3">
+              <button type="button" (click)="regenerateQR()"
+                class="flex-1 bg-blue-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-blue-700 transition-all">
+                <i class="fas fa-sync-alt mr-2"></i>Regenerar QR
+              </button>
+            </div>
+          </div>
+
+          <!-- Estado: WhatsApp Conectado -->
+          <div *ngIf="whatsappConnected" class="text-center py-8">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+              <i class="fas fa-check-circle text-5xl text-green-600"></i>
+            </div>
+            <h3 class="text-2xl font-black text-gray-900 mb-2">¡WhatsApp Conectado!</h3>
+            <p class="text-gray-600">Redirigiendo al dashboard...</p>
+          </div>
+        </div>
+
+        <!-- Step 4: Confirmación Final -->
+        <div *ngIf="currentStep === 4" class="space-y-6">
+          <div class="text-center">
+            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <i class="fas fa-check-circle text-5xl text-green-600"></i>
+            </div>
+            <h2 class="text-3xl font-black text-gray-900 mb-2">¡Todo listo!</h2>
+            <p class="text-gray-600 text-base">Tu cuenta está configurada y WhatsApp conectado</p>
+          </div>
+
+          <div class="bg-blue-50 rounded-xl p-6 space-y-3">
+            <div class="flex items-start gap-3">
+              <i class="fas fa-user text-blue-600 mt-1"></i>
+              <div>
+                <p class="font-bold text-gray-700 text-sm">Usuario</p>
+                <p class="text-gray-600 text-sm">{{ datosUsuario.nombre_usuario }}</p>
+                <p class="text-gray-600 text-sm">{{ datosUsuario.correo_usuario }}</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <i class="fas fa-building text-blue-600 mt-1"></i>
+              <div>
+                <p class="font-bold text-gray-700 text-sm">Empresa</p>
+                <p class="text-gray-600 text-sm">{{ datosUsuario.nombre_empresa }}</p>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <i class="fab fa-whatsapp text-green-600 mt-1"></i>
+              <div>
+                <p class="font-bold text-gray-700 text-sm">WhatsApp</p>
+                <p class="text-green-600 text-sm">✓ Conectado exitosamente</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <button (click)="goToDashboard()"
+              class="block w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3.5 px-6 rounded-xl hover:shadow-xl transition-all text-center">
+              <i class="fas fa-tachometer-alt mr-2"></i>Ir al Dashboard
+            </button>
+          </div>
+        </div>
+
+        <!-- Link a Login -->
+        <div *ngIf="currentStep < 4" class="text-center">
+          <p class="text-sm font-semibold text-gray-700">
+            ¿Ya tienes cuenta?
+            <a routerLink="/login" class="text-blue-600 hover:text-blue-700 font-bold transition-colors ml-1">
+              Inicia sesión
+            </a>
+          </p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Right Side - Illustration (Desktop only) -->
+  <aside class="hidden lg:flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 w-full lg:w-1/2 p-8">
+    <div class="max-w-lg w-full space-y-6">
+      <div class="text-center space-y-3">
+        <h2 class="text-3xl xl:text-4xl font-black text-white leading-tight">
+          Automatiza tu WhatsApp
+        </h2>
+        <p class="text-white text-base xl:text-lg font-medium opacity-90">
+          Gestiona múltiples empresas y configura respuestas automáticas con N8N
+        </p>
+      </div>
+
+      <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 shadow-2xl">
+        <svg viewBox="0 0 500 400" class="w-full h-auto drop-shadow-2xl">
+          <defs>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Phone Mockup -->
+          <g filter="url(#glow)">
+            <rect x="160" y="40" width="180" height="320" rx="20" fill="white" stroke="#e5e7eb" stroke-width="3"/>
+            <rect x="170" y="55" width="160" height="290" rx="15" fill="#f9fafb"/>
+
+            <!-- WhatsApp Header -->
+            <rect x="170" y="55" width="160" height="40" rx="15" fill="#3b82f6"/>
+            <circle cx="190" cy="75" r="10" fill="white" opacity="0.9"/>
+            <rect x="208" y="68" width="80" height="7" rx="3" fill="white" opacity="0.9"/>
+            <rect x="208" y="78" width="50" height="5" rx="2" fill="white" opacity="0.7"/>
+
+            <!-- Chat Messages -->
+            <rect x="180" y="110" width="110" height="35" rx="12" fill="#3b82f6" opacity="0.9"/>
+            <rect x="188" y="120" width="70" height="6" rx="3" fill="white" opacity="0.9"/>
+            <rect x="188" y="130" width="85" height="6" rx="3" fill="white" opacity="0.9"/>
+
+            <rect x="205" y="155" width="110" height="35" rx="12" fill="#e5e7eb"/>
+            <rect x="213" y="165" width="75" height="6" rx="3" fill="#6b7280"/>
+            <rect x="213" y="175" width="60" height="6" rx="3" fill="#6b7280"/>
+
+            <rect x="180" y="200" width="120" height="40" rx="12" fill="#3b82f6" opacity="0.9"/>
+            <rect x="188" y="210" width="70" height="6" rx="3" fill="white" opacity="0.9"/>
+            <rect x="188" y="220" width="95" height="6" rx="3" fill="white" opacity="0.9"/>
+          </g>
+
+          <!-- N8N Badge -->
+          <g>
+            <rect x="355" y="150" width="80" height="50" rx="10" fill="white" opacity="0.95"/>
+            <text x="395" y="182" font-size="20" font-weight="bold" fill="#ea4b71" text-anchor="middle">N8N</text>
+          </g>
+
+          <!-- Floating Icons -->
+          <circle cx="80" cy="120" r="30" fill="white" opacity="0.2"/>
+          <text x="65" y="132" font-size="24">⚡</text>
+
+          <circle cx="420" cy="300" r="30" fill="white" opacity="0.2"/>
+          <text x="405" y="312" font-size="24">💬</text>
+
+          <circle cx="70" cy="320" r="30" fill="white" opacity="0.2"/>
+          <text x="55" y="332" font-size="24">🤖</text>
+        </svg>
+      </div>
+    </div>
+  </aside>
+</div>

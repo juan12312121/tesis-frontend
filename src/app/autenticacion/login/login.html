@@ -1,0 +1,217 @@
+<div class="min-h-screen flex flex-col lg:flex-row">
+  <!-- Left Side - Form Section -->
+  <div class="w-full lg:w-1/2 flex flex-col">
+    <!-- Header con logo -->
+    <header class="py-6 px-6 sm:px-8 bg-gradient-to-br from-blue-50 to-indigo-50 lg:bg-white">
+      <a routerLink="/" class="cursor-pointer flex items-center">
+        <svg class="w-8 h-8 sm:w-10 sm:h-10" viewBox="0 0 50 50" fill="none">
+          <rect width="50" height="50" rx="10" fill="#1e40af"/>
+          <path d="M15 20 L25 15 L35 20 L35 35 L25 40 L15 35 Z" fill="#3b82f6"/>
+          <circle cx="25" cy="25" r="6" fill="white"/>
+          <path d="M25 22 L25 28 M22 25 L28 25" stroke="#1e40af" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <div class="ml-3 text-2xl sm:text-3xl font-black bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent tracking-wide">
+          FlowBot
+        </div>
+      </a>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col items-center justify-center px-6 sm:px-8 lg:px-12 xl:px-20 py-6 lg:py-8">
+      <div class="w-full max-w-md space-y-4">
+
+        <!-- Título y subtítulo -->
+        <div class="text-center lg:text-left space-y-1.5">
+          <h1 class="text-2xl sm:text-3xl text-gray-900 font-black">
+            Bienvenido de nuevo
+          </h1>
+          <p class="text-gray-500 text-sm sm:text-base font-medium">
+            Ingresa tus credenciales para continuar
+          </p>
+        </div>
+
+        <!-- Mensaje de Respuesta -->
+        <div *ngIf="responseMessage.show"
+             [ngClass]="{
+               'bg-green-50 border-green-200': responseMessage.success,
+               'bg-red-50 border-red-200': !responseMessage.success
+             }"
+             class="p-4 rounded-lg flex items-start gap-3 border">
+          <i [ngClass]="{
+               'fas fa-check-circle text-green-500': responseMessage.success,
+               'fas fa-exclamation-circle text-red-500': !responseMessage.success
+             }"
+             class="mt-0.5 text-lg"></i>
+          <p [ngClass]="{
+               'text-green-800': responseMessage.success,
+               'text-red-800': !responseMessage.success
+             }"
+             class="text-sm font-semibold flex-1">
+            {{ responseMessage.text }}
+          </p>
+          <button (click)="hideMessage()" class="text-gray-400 hover:text-gray-600">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+
+        <!-- Login Form -->
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="space-y-3">
+          <!-- Email -->
+          <div class="space-y-1.5">
+            <label class="block text-sm font-bold text-gray-700">
+              <i class="fas fa-envelope text-blue-600 mr-2"></i>Correo Electrónico
+            </label>
+            <input
+              type="email"
+              formControlName="correo"
+              [ngClass]="{
+                'border-red-500 focus:border-red-500 focus:ring-red-200': correo?.invalid && correo?.touched
+              }"
+              class="w-full text-sm py-2.5 px-4 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+              placeholder="tu@email.com">
+            <p *ngIf="correo?.invalid && correo?.touched" class="text-red-500 text-xs mt-1">
+              <span *ngIf="correo?.errors?.['required']">El correo es requerido</span>
+              <span *ngIf="correo?.errors?.['email']">Ingresa un correo válido</span>
+            </p>
+          </div>
+
+          <!-- Password -->
+          <div class="space-y-1.5">
+            <label class="block text-sm font-bold text-gray-700">
+              <i class="fas fa-lock text-blue-600 mr-2"></i>Contraseña
+            </label>
+            <div class="relative">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                [ngClass]="{
+                  'border-red-500 focus:border-red-500 focus:ring-red-200': password?.invalid && password?.touched
+                }"
+                class="w-full text-sm py-2.5 px-4 pr-12 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all"
+                placeholder="Tu contraseña">
+              <button
+                type="button"
+                (click)="togglePassword()"
+                class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700">
+                <i [ngClass]="showPassword ? 'fa-eye-slash' : 'fa-eye'" class="fas"></i>
+              </button>
+            </div>
+            <p *ngIf="password?.invalid && password?.touched" class="text-red-500 text-xs mt-1">
+              <span *ngIf="password?.errors?.['required']">La contraseña es requerida</span>
+              <span *ngIf="password?.errors?.['minlength']">Mínimo 6 caracteres</span>
+            </p>
+          </div>
+
+          <!-- Remember me y Forgot password -->
+          <div class="flex items-center justify-between text-sm">
+            <label class="flex items-center cursor-pointer">
+              <input
+                type="checkbox"
+                formControlName="recordar"
+                class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+              <span class="ml-2 text-gray-700 font-semibold">Recordarme</span>
+            </label>
+            <a routerLink="/recuperar" class="text-blue-600 hover:text-blue-700 font-bold transition-colors">
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
+
+          <!-- Submit Button -->
+          <div class="pt-2">
+            <button
+              type="submit"
+              [disabled]="isSubmitting"
+              [ngClass]="{
+                'opacity-70 cursor-not-allowed': isSubmitting
+              }"
+              class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 px-6 w-full rounded-xl font-bold text-base hover:shadow-xl transition-all transform hover:-translate-y-0.5">
+              <span class="flex items-center justify-center gap-2">
+                <i [ngClass]="isSubmitting ? 'fa-spinner fa-spin' : 'fa-sign-in-alt'" class="fas"></i>
+                {{ isSubmitting ? 'Iniciando...' : 'Iniciar Sesión' }}
+              </span>
+            </button>
+          </div>
+        </form>
+
+        <!-- Link a Registro -->
+        <div class="text-center pt-2">
+          <p class="text-sm font-semibold text-gray-700">
+            ¿No tienes cuenta?
+            <a routerLink="/registro" class="text-blue-600 hover:text-blue-700 font-bold transition-colors ml-1">
+              Regístrate gratis
+            </a>
+          </p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Right Side - Illustration (Desktop only) -->
+  <aside class="hidden lg:flex flex-col items-center justify-center bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-600 w-full lg:w-1/2 p-8">
+    <div class="max-w-lg w-full space-y-6">
+      <div class="text-center space-y-3">
+        <h2 class="text-3xl xl:text-4xl font-black text-white leading-tight">
+          Automatiza tu WhatsApp
+        </h2>
+        <p class="text-white text-base xl:text-lg font-medium opacity-90">
+          Gestiona múltiples empresas y configura respuestas automáticas con N8N
+        </p>
+      </div>
+
+      <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 shadow-2xl">
+        <svg viewBox="0 0 500 400" class="w-full h-auto drop-shadow-2xl">
+          <defs>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feMerge>
+                <feMergeNode in="coloredBlur"/>
+                <feMergeNode in="SourceGraphic"/>
+              </feMerge>
+            </filter>
+          </defs>
+
+          <!-- Phone Mockup -->
+          <g filter="url(#glow)">
+            <rect x="160" y="40" width="180" height="320" rx="20" fill="white" stroke="#e5e7eb" stroke-width="3"/>
+            <rect x="170" y="55" width="160" height="290" rx="15" fill="#f9fafb"/>
+
+            <!-- WhatsApp Header -->
+            <rect x="170" y="55" width="160" height="40" rx="15" fill="#3b82f6"/>
+            <circle cx="190" cy="75" r="10" fill="white" opacity="0.9"/>
+            <rect x="208" y="68" width="80" height="7" rx="3" fill="white" opacity="0.9"/>
+            <rect x="208" y="78" width="50" height="5" rx="2" fill="white" opacity="0.7"/>
+
+            <!-- Chat Messages -->
+            <rect x="180" y="110" width="110" height="35" rx="12" fill="#3b82f6" opacity="0.9"/>
+            <rect x="188" y="120" width="70" height="6" rx="3" fill="white" opacity="0.9"/>
+            <rect x="188" y="130" width="85" height="6" rx="3" fill="white" opacity="0.9"/>
+
+            <rect x="205" y="155" width="110" height="35" rx="12" fill="#e5e7eb"/>
+            <rect x="213" y="165" width="75" height="6" rx="3" fill="#6b7280"/>
+            <rect x="213" y="175" width="60" height="6" rx="3" fill="#6b7280"/>
+
+            <rect x="180" y="200" width="120" height="40" rx="12" fill="#3b82f6" opacity="0.9"/>
+            <rect x="188" y="210" width="70" height="6" rx="3" fill="white" opacity="0.9"/>
+            <rect x="188" y="220" width="95" height="6" rx="3" fill="white" opacity="0.9"/>
+          </g>
+
+          <!-- N8N Badge -->
+          <g>
+            <rect x="355" y="150" width="80" height="50" rx="10" fill="white" opacity="0.95"/>
+            <text x="395" y="182" font-size="20" font-weight="bold" fill="#ea4b71" text-anchor="middle">N8N</text>
+          </g>
+
+          <!-- Floating Icons -->
+          <circle cx="80" cy="120" r="30" fill="white" opacity="0.2"/>
+          <text x="65" y="132" font-size="24">⚡</text>
+
+          <circle cx="420" cy="300" r="30" fill="white" opacity="0.2"/>
+          <text x="405" y="312" font-size="24">💬</text>
+
+          <circle cx="70" cy="320" r="30" fill="white" opacity="0.2"/>
+          <text x="55" y="332" font-size="24">🤖</text>
+        </svg>
+      </div>
+    </div>
+  </aside>
+</div>
