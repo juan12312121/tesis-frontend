@@ -1,7 +1,9 @@
-// core/servicios/pedidos/pedidos.service.ts
+// core/servicios/pedidos/pedidos.service.ts - COMPLETO CON WHATSAPP Y TOKEN
+
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { Autenticacion } from '../autenticacion/autenticacion';
 
 export interface ItemPedido {
   producto_id?: number;
@@ -20,6 +22,10 @@ export interface Pedido {
   total: number;
   fecha_creacion: string;
   items?: ItemPedido[];
+  // Campos adicionales para WhatsApp
+  jid_whatsapp?: string;
+  numero_real?: string;
+  push_name?: string;
 }
 
 export interface EstadisticasPorEstado {
@@ -52,7 +58,10 @@ export interface ApiResponse<T> {
 export class Pedidos {
   private apiUrl = 'http://localhost:3000/api/pedidos';
 
-  constructor(private http: HttpClient) {
+  constructor(
+    private http: HttpClient,
+    private authService: Autenticacion
+  ) {
     console.log('🔧 Servicio de Pedidos inicializado');
     console.log('📍 API URL:', this.apiUrl);
   }
@@ -115,6 +124,51 @@ export class Pedidos {
     );
   }
 
+  // ==================== ENVIAR MENSAJE WHATSAPP 🔥 ====================
+
+  /**
+   * Enviar mensaje de WhatsApp a un cliente
+   * @param empresaId ID de la empresa
+   * @param nombreSesion Nombre de la sesión WhatsApp
+   * @param jidWhatsapp JID del cliente (ej: 52064214372462@lid)
+   * @param mensaje Mensaje a enviar
+   * @returns Observable con la respuesta del servidor
+   */
+  enviarMensajeCliente(
+    empresaId: string,
+    nombreSesion: string,
+    jidWhatsapp: string,
+    mensaje: string
+  ): Observable<any> {
+    console.log('📤 Servicio: Enviando mensaje a cliente');
+    console.log('   ├─ empresaId:', empresaId);
+    console.log('   ├─ nombreSesion:', nombreSesion);
+    console.log('   ├─ jidWhatsapp:', jidWhatsapp);
+    console.log('   └─ mensaje:', mensaje.substring(0, 50) + '...');
+
+    const payload = {
+      empresaId,
+      nombreSesion,
+      jidWhatsapp,
+      mensaje
+    };
+
+    console.log('📦 Payload:', JSON.stringify(payload, null, 2));
+
+    // 🔥 AGREGAR TOKEN AQUÍ
+    const token = this.authService.getToken();
+    console.log('🔐 Token obtenido:', token ? '✅ Sí' : '❌ No');
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Authorization': token ? `Bearer ${token}` : ''
+    });
+
+    console.log('📋 Headers enviados:', { Authorization: token ? 'Bearer [token]' : 'No token' });
+
+    return this.http.post('http://localhost:3000/api/whatsapp/public/enviar-mensaje-cliente', payload, { headers });
+  }
+
   // ==================== UTILIDADES ====================
 
   /**
@@ -142,10 +196,15 @@ export class Pedidos {
   }
 
   /**
-   * Formatear teléfono (remover @s.whatsapp.net)
+   * Formatear teléfono (remover @s.whatsapp.net y @lid)
    */
   formatearTelefono(telefono: string): string {
-    return telefono.replace('@s.whatsapp.net', '').replace('@lid', '');
+    if (!telefono) return '';
+    return telefono
+      .replace('@s.whatsapp.net', '')
+      .replace('@lid', '')
+      .replace('@g.us', '')
+      .trim();
   }
 
   /**
@@ -249,5 +308,20 @@ export class Pedidos {
    */
   ordenarPorTotal(pedidos: Pedido[]): Pedido[] {
     return [...pedidos].sort((a, b) => b.total - a.total);
+  }
+
+  /**
+   * Obtener nombre del cliente para mensaje
+   */
+  obtenerNombreCliente(pedido: Pedido): string {
+    return pedido.nombre_cliente || (pedido as any).push_name || 'Cliente';
+  }
+
+  /**
+   * Obtener JID válido del pedido (prioriza jid_whatsapp sobre telefono)
+   */
+  obtenerJidValido(pedido: Pedido): string | null {
+    const jid = (pedido as any).jid_whatsapp || pedido.telefono_cliente;
+    return jid && jid.trim() ? jid : null;
   }
 }

@@ -1,4 +1,4 @@
-<!-- pedidos.html - Vista de Tabla Completa ACTUALIZADA -->
+<!-- pedidos.html - Vista de Tabla Completa ACTUALIZADA CON WHATSAPP -->
 
 <!-- Loading State -->
 <div *ngIf="cargando" class="flex items-center justify-center h-screen bg-gray-50">
@@ -31,8 +31,7 @@
               <i class="fas fa-shopping-cart text-blue-600"></i>
               <span>Gestión de Pedidos</span>
             </h2>
-            <p class="text-xs sm:text-sm text-gray-500 font-medium hidden sm:block">Administra y da seguimiento a tus
-              pedidos</p>
+            <p class="text-xs sm:text-sm text-gray-500 font-medium hidden sm:block">Administra y da seguimiento a tus pedidos</p>
           </div>
         </div>
       </div>
@@ -40,12 +39,12 @@
 
     <!-- Content Area with Scroll -->
     <main class="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6">
+
       <!-- Mensaje de notificación -->
       <div *ngIf="mensaje.mostrar" [class]="'mb-6 p-4 rounded-lg border flex items-center justify-between ' +
                     (mensaje.tipo === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200')">
         <div class="flex items-center space-x-3">
-          <i
-            [class]="'fas ' + (mensaje.tipo === 'success' ? 'fa-check-circle text-green-600' : 'fa-exclamation-circle text-red-600')"></i>
+          <i [class]="'fas ' + (mensaje.tipo === 'success' ? 'fa-check-circle text-green-600' : 'fa-exclamation-circle text-red-600')"></i>
           <span [class]="'font-semibold text-sm ' + (mensaje.tipo === 'success' ? 'text-green-800' : 'text-red-800')">
             {{ mensaje.texto }}
           </span>
@@ -138,8 +137,8 @@
       </div>
 
       <!-- Tabla de Pedidos -->
-      <div *ngIf="pedidosFiltrados.length > 0"
-        class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div *ngIf="pedidosFiltrados.length > 0" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+
         <!-- Header de la tabla con contador -->
         <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
           <div class="flex items-center justify-between">
@@ -158,31 +157,18 @@
           <table class="w-full">
             <thead class="bg-gray-100 border-b-2 border-gray-300">
               <tr>
-                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">
-                  ID
-                </th>
-                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">
-                  Cliente
-                </th>
-                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">
-                  Teléfono
-                </th>
-                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">
-                  Estado
-                </th>
-                <th class="px-6 py-4 text-right text-xs font-black text-gray-700 uppercase tracking-wider">
-                  Total
-                </th>
-                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">
-                  Fecha
-                </th>
-                <th class="px-6 py-4 text-center text-xs font-black text-gray-700 uppercase tracking-wider">
-                  Acciones
-                </th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">ID</th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Cliente</th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">WhatsApp</th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Estado</th>
+                <th class="px-6 py-4 text-right text-xs font-black text-gray-700 uppercase tracking-wider">Total</th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Fecha</th>
+                <th class="px-6 py-4 text-center text-xs font-black text-gray-700 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
               <tr *ngFor="let pedido of pedidosPaginados" class="hover:bg-blue-50 transition">
+
                 <!-- ID -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center">
@@ -196,30 +182,32 @@
                 <!-- Cliente -->
                 <td class="px-6 py-4">
                   <div class="flex items-center">
-                    <div
-                      class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
-                      {{ pedido.nombre_cliente ? pedido.nombre_cliente.charAt(0).toUpperCase() : '?' }} </div>
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
+                      {{ pedido.nombre_cliente ? pedido.nombre_cliente.charAt(0).toUpperCase() : '?' }}
+                    </div>
                     <div class="ml-3">
                       <p class="text-sm font-bold text-gray-900">{{ pedido.nombre_cliente || 'Sin nombre' }}</p>
                     </div>
                   </div>
                 </td>
 
-                <!-- Teléfono -->
+                <!-- WhatsApp - Solo mostrar número -->
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <a *ngIf="pedido.telefono_cliente"
-                    [href]="'https://wa.me/' + formatearTelefono(pedido.telefono_cliente)" target="_blank"
-                    class="inline-flex items-center space-x-2 text-sm font-semibold text-green-600 hover:text-green-700 transition">
-                    <i class="fab fa-whatsapp text-lg"></i>
-                    <span>{{ formatearTelefono(pedido.telefono_cliente) }}</span>
-                  </a>
-                  <span *ngIf="!pedido.telefono_cliente" class="text-sm text-gray-400">Sin teléfono</span>
+                  <span *ngIf="pedido.telefono_cliente || $any(pedido).jid_whatsapp"
+                        class="inline-flex items-center space-x-1 text-sm font-semibold text-gray-700">
+                    <i class="fab fa-whatsapp text-green-600"></i>
+                    <span>{{ formatearTelefono($any(pedido).jid_whatsapp || pedido.telefono_cliente) }}</span>
+                  </span>
+
+                  <span *ngIf="!pedido.telefono_cliente && !$any(pedido).jid_whatsapp"
+                        class="text-sm text-gray-400 font-medium">
+                    Sin contacto
+                  </span>
                 </td>
 
                 <!-- Estado -->
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <span
-                    [class]="'inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border-2 ' + getEstadoColor(pedido.estado)">
+                  <span [class]="'inline-flex items-center space-x-2 px-3 py-1 rounded-full text-xs font-bold border-2 ' + getEstadoColor(pedido.estado)">
                     <i [class]="'fas ' + getEstadoIcono(pedido.estado)"></i>
                     <span>{{ getEstadoTexto(pedido.estado) }}</span>
                   </span>
@@ -233,12 +221,8 @@
                 <!-- Fecha -->
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="text-sm">
-                    <p class="text-gray-900 font-semibold">
-                      {{ formatearFechaCorta(pedido.fecha_creacion) }}
-                    </p>
-                    <p class="text-gray-500 text-xs">
-                      {{ formatearHora(pedido.fecha_creacion) }}
-                    </p>
+                    <p class="text-gray-900 font-semibold">{{ formatearFechaCorta(pedido.fecha_creacion) }}</p>
+                    <p class="text-gray-500 text-xs">{{ formatearHora(pedido.fecha_creacion) }}</p>
                   </div>
                 </td>
 
@@ -345,8 +329,7 @@
       </div>
 
       <!-- Estado Vacío -->
-      <div *ngIf="pedidosFiltrados.length === 0"
-        class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+      <div *ngIf="pedidosFiltrados.length === 0" class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
         <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
           <i class="fas fa-shopping-cart text-gray-400 text-5xl"></i>
         </div>
@@ -354,8 +337,7 @@
           {{ terminoBusqueda || filtroEstado !== 'todos' ? 'No se encontraron pedidos' : 'No hay pedidos registrados' }}
         </h3>
         <p class="text-base text-gray-600 mb-6">
-          {{ terminoBusqueda || filtroEstado !== 'todos' ? 'Intenta ajustar los filtros de búsqueda' : 'Los pedidos
-          aparecerán aquí automáticamente' }}
+          {{ terminoBusqueda || filtroEstado !== 'todos' ? 'Intenta ajustar los filtros de búsqueda' : 'Los pedidos aparecerán aquí automáticamente' }}
         </p>
         <button *ngIf="terminoBusqueda || filtroEstado !== 'todos'"
           (click)="limpiarBusqueda(); cambiarFiltroEstado('todos')"
@@ -368,13 +350,12 @@
   </div>
 </div>
 
-<!-- Modal de Detalle -->
+<!-- Modal de Detalle 🔥 ACTUALIZADO -->
 <div *ngIf="mostrarModal && pedidoSeleccionado" class="fixed inset-0 z-50 overflow-y-auto" (click)="cerrarModal()">
   <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
     <div class="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75"></div>
 
-    <div
-      class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
+    <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full"
       (click)="$event.stopPropagation()">
 
       <!-- Header -->
@@ -386,8 +367,7 @@
             </div>
             <div>
               <h3 class="text-base font-black">Pedido #{{ pedidoSeleccionado.id }}</h3>
-              <p class="text-xs opacity-75">{{ formatearFechaCorta(pedidoSeleccionado.fecha_creacion) }}, {{
-                formatearHora(pedidoSeleccionado.fecha_creacion) }}</p>
+              <p class="text-xs opacity-75">{{ formatearFechaCorta(pedidoSeleccionado.fecha_creacion) }}, {{ formatearHora(pedidoSeleccionado.fecha_creacion) }}</p>
             </div>
           </div>
           <button (click)="cerrarModal()" class="hover:opacity-75 transition">
@@ -398,30 +378,31 @@
 
       <!-- Contenido -->
       <div class="p-4 max-h-[60vh] overflow-y-auto">
+
         <!-- Información del Cliente -->
         <div class="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
           <h4 class="text-xs font-bold text-gray-700 mb-2 flex items-center space-x-1">
             <i class="fas fa-user text-sm"></i>
             <span>Información del Cliente</span>
           </h4>
-          <div class="space-y-1">
+          <div class="space-y-2">
             <div>
               <span class="text-xs text-gray-500">Nombre:</span>
               <p class="text-sm font-bold text-gray-900">{{ pedidoSeleccionado.nombre_cliente || 'Sin nombre' }}</p>
             </div>
-            <div *ngIf="pedidoSeleccionado.telefono_cliente">
-              <span class="text-xs text-gray-500">Teléfono:</span>
-              <div class="flex items-center space-x-1 mt-0.5">
-                <i class="fab fa-whatsapp text-green-600 text-sm"></i>
-                <a [href]="'https://wa.me/' + formatearTelefono(pedidoSeleccionado.telefono_cliente)" target="_blank"
-                  class="text-xs text-green-600 hover:text-green-700 font-semibold">
-                  {{ formatearTelefono(pedidoSeleccionado.telefono_cliente) }}
-                </a>
-              </div>
+
+            <!-- Contacto WhatsApp 🔥 ACTUALIZADO -->
+            <div *ngIf="pedidoSeleccionado.telefono_cliente || $any(pedidoSeleccionado).jid_whatsapp">
+              <span class="text-xs text-gray-500">WhatsApp:</span>
+              <p class="text-sm font-semibold text-gray-900 mt-1">
+                <i class="fab fa-whatsapp text-green-600 mr-2"></i>
+                {{ formatearTelefono($any(pedidoSeleccionado).jid_whatsapp || pedidoSeleccionado.telefono_cliente) }}
+              </p>
             </div>
-            <div *ngIf="!pedidoSeleccionado.telefono_cliente">
+
+            <div *ngIf="!pedidoSeleccionado.telefono_cliente && !$any(pedidoSeleccionado).jid_whatsapp">
               <span class="text-xs text-gray-500">Teléfono:</span>
-              <p class="text-sm text-gray-400">Sin teléfono</p>
+              <p class="text-sm text-gray-400">Sin teléfono registrado</p>
             </div>
           </div>
         </div>
@@ -433,8 +414,7 @@
             <span>Estado del Pedido</span>
           </h4>
           <div class="flex items-center justify-between">
-            <span
-              [class]="'text-xs font-bold px-3 py-1 rounded-full border-2 flex items-center space-x-1 ' + getEstadoColor(pedidoSeleccionado.estado)">
+            <span [class]="'text-xs font-bold px-3 py-1 rounded-full border-2 flex items-center space-x-1 ' + getEstadoColor(pedidoSeleccionado.estado)">
               <i [class]="'fas text-xs ' + getEstadoIcono(pedidoSeleccionado.estado)"></i>
               <span>{{ getEstadoTexto(pedidoSeleccionado.estado) }}</span>
             </span>
@@ -456,7 +436,8 @@
             <button (click)="actualizarEstado(pedidoSeleccionado.id, 'entregado')" [disabled]="actualizando"
               class="w-full bg-green-100 text-green-800 font-bold py-1.5 px-3 rounded-lg hover:bg-green-200 transition border border-green-300 text-xs flex items-center justify-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed">
               <i class="fas fa-check-circle text-xs"></i>
-              <span>Entregado</span></button>
+              <span>Entregado</span>
+            </button>
             <button (click)="actualizarEstado(pedidoSeleccionado.id, 'cancelado')" [disabled]="actualizando"
               class="w-full bg-red-100 text-red-800 font-bold py-1.5 px-3 rounded-lg hover:bg-red-200 transition border border-red-300 text-xs flex items-center justify-center space-x-1 disabled:opacity-50 disabled:cursor-not-allowed">
               <i class="fas fa-times-circle text-xs"></i>
@@ -472,12 +453,10 @@
             <span>Productos ({{ pedidoSeleccionado.items.length }})</span>
           </h4>
           <div class="space-y-2">
-            <div *ngFor="let item of pedidoSeleccionado.items"
-              class="p-2 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition">
+            <div *ngFor="let item of pedidoSeleccionado.items" class="p-2 bg-white rounded-lg border border-gray-200 hover:border-blue-300 transition">
               <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-2 flex-1">
-                  <div
-                    class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white flex-shrink-0">
+                  <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center text-white flex-shrink-0">
                     <i class="fas fa-box text-xs"></i>
                   </div>
                   <div class="flex-1 min-w-0">
@@ -497,13 +476,10 @@
         </div>
 
         <!-- Mensaje si no hay productos -->
-        <div *ngIf="!pedidoSeleccionado.items || pedidoSeleccionado.items.length === 0"
-          class="mb-3 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
+        <div *ngIf="!pedidoSeleccionado.items || pedidoSeleccionado.items.length === 0" class="mb-3 p-2 bg-yellow-50 rounded-lg border border-yellow-200">
           <div class="flex items-center space-x-2">
             <i class="fas fa-exclamation-triangle text-yellow-600 text-sm"></i>
-            <p class="text-xs text-yellow-800 font-semibold">
-              Este pedido no tiene productos asociados
-            </p>
+            <p class="text-xs text-yellow-800 font-semibold">Este pedido no tiene productos asociados</p>
           </div>
         </div>
 

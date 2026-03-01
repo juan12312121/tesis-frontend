@@ -7,7 +7,6 @@ import { SidebarComponent } from '../../componentes/aside/aside';
 import { WhatsappStatus } from '../../componentes/whatsapp-status/whatsapp-status';
 import { Pedidos, Pedido, Estadisticas } from '../../core/servicios/pedidos/pedidos';
 
-// Declarar Chart.js globalmente
 declare const Chart: any;
 
 interface Empresa {
@@ -61,7 +60,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private readonly API_URL = 'http://localhost:3000/api';
 
-  // Estado
   empresaId: string = '';
   empresa: Empresa | null = null;
   usuario: Usuario | null = null;
@@ -70,26 +68,21 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   sidebarOpen: boolean = true;
   isLoading: boolean = true;
 
-  // Gráfica de pedidos
   private pedidosChart: any = null;
-  vistaActual: string = 'dia'; // 'dia', 'semana', 'mes'
+  vistaActual: string = 'dia';
 
-  // Estadísticas de pedidos (DATOS REALES)
   totalPedidos: number = 0;
   promedioDiario: number = 0;
   diaMasPedidos: string = '-';
   tendencia: number = 0;
   estadisticas: Estadisticas | null = null;
 
-  // Actividad reciente (DATOS REALES)
   actividadReciente: ActividadReciente[] = [];
   pedidosRecientes: Pedido[] = [];
 
-  // Estado WhatsApp
   whatsappConnected: boolean = false;
   conversacionesActivas: number = 0;
 
-  // Datos para diferentes vistas (DATOS REALES)
   private datosPorDia = {
     labels: [] as string[],
     data: [] as number[]
@@ -134,24 +127,16 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
-  // ============================================
-  // CARGAR DATOS REALES
-  // ============================================
-
   async loadEmpresaData(): Promise<void> {
     try {
       this.isLoading = true;
 
-      console.log(`📊 Cargando datos reales para empresa ${this.empresaId}...`);
-
-      // Cargar datos en paralelo
       await Promise.all([
         this.cargarPedidos(),
         this.cargarEstadisticas(),
         this.cargarDatosGrafica()
       ]);
 
-      // Simular datos de empresa (esto después lo puedes conectar a tu API)
       this.empresa = {
         id: this.empresaId,
         nombre: 'Mi Empresa',
@@ -165,123 +150,84 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
       this.isLoading = false;
 
-      console.log('✅ Datos del dashboard cargados exitosamente');
-
     } catch (error) {
-      console.error('❌ Error al cargar datos de empresa:', error);
       this.isLoading = false;
     }
   }
 
   async cargarPedidos(): Promise<void> {
     try {
-      console.log('📋 Cargando pedidos recientes...');
-
       this.pedidosService.obtenerPedidos(this.empresaId, undefined, true).subscribe({
         next: (response) => {
           if (response.success && response.data) {
             this.pedidosRecientes = this.pedidosService.ordenarPorFecha(response.data);
 
-            // Convertir pedidos a actividad reciente (tomar los últimos 5)
             this.actividadReciente = this.pedidosRecientes
               .slice(0, 5)
               .map(pedido => this.convertirPedidoAActividad(pedido));
-
-            console.log(`✅ ${this.pedidosRecientes.length} pedidos cargados`);
-            console.log(`📊 Actividad reciente:`, this.actividadReciente);
           }
         },
-        error: (error) => {
-          console.error('❌ Error al cargar pedidos:', error);
+        error: () => {
           this.actividadReciente = [];
         }
       });
     } catch (error) {
-      console.error('❌ Error en cargarPedidos:', error);
     }
   }
 
   async cargarEstadisticas(): Promise<void> {
     try {
-      console.log('📊 Cargando estadísticas...');
-
       this.pedidosService.obtenerEstadisticas(this.empresaId).subscribe({
         next: (response) => {
           if (response.success && response.data) {
             this.estadisticas = response.data;
             this.totalPedidos = response.data.totales.total_pedidos;
-
-            console.log('✅ Estadísticas cargadas:', this.estadisticas);
           }
         },
-        error: (error) => {
-          console.error('❌ Error al cargar estadísticas:', error);
+        error: () => {
         }
       });
     } catch (error) {
-      console.error('❌ Error en cargarEstadisticas:', error);
     }
   }
 
   async cargarDatosGrafica(): Promise<void> {
     try {
-      console.log('📈 Calculando datos para gráfica...');
-
       this.pedidosService.obtenerPedidos(this.empresaId, undefined, true).subscribe({
         next: (response) => {
           if (response.success && response.data) {
             const pedidos = response.data;
 
-            // Procesar datos por día (últimos 14 días)
             this.datosPorDia = this.procesarDatosPorDia(pedidos);
-
-            // Procesar datos por semana (últimas 4 semanas)
             this.datosPorSemana = this.procesarDatosPorSemana(pedidos);
-
-            // Procesar datos por mes (últimos 12 meses)
             this.datosPorMes = this.procesarDatosPorMes(pedidos);
 
-            // Calcular promedio diario
             if (this.datosPorDia.data.length > 0) {
               const suma = this.datosPorDia.data.reduce((a, b) => a + b, 0);
               this.promedioDiario = Math.round(suma / this.datosPorDia.data.length);
             }
 
-            // Encontrar día con más pedidos
             const maxPedidos = Math.max(...this.datosPorDia.data);
             const indexMaxDia = this.datosPorDia.data.indexOf(maxPedidos);
             this.diaMasPedidos = this.datosPorDia.labels[indexMaxDia] || '-';
 
-            console.log('✅ Datos de gráfica procesados');
-            console.log('📊 Por día:', this.datosPorDia);
-            console.log('📊 Por semana:', this.datosPorSemana);
-            console.log('📊 Por mes:', this.datosPorMes);
-
-            // Actualizar gráfica si ya está inicializada
             if (this.pedidosChart) {
               this.updatePedidosChart();
             }
           }
         },
-        error: (error) => {
-          console.error('❌ Error al cargar datos de gráfica:', error);
+        error: () => {
         }
       });
     } catch (error) {
-      console.error('❌ Error en cargarDatosGrafica:', error);
     }
   }
-
-  // ============================================
-  // PROCESAMIENTO DE DATOS PARA GRÁFICAS
-  // ============================================
 
   procesarDatosPorDia(pedidos: Pedido[]): { labels: string[], data: number[] } {
     const hoy = new Date();
     const labels: string[] = [];
     const data: number[] = [];
 
-    // Generar últimos 14 días
     for (let i = 13; i >= 0; i--) {
       const fecha = new Date(hoy);
       fecha.setDate(fecha.getDate() - i);
@@ -289,7 +235,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
       const dia = fecha.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' });
       labels.push(dia);
 
-      // Contar pedidos de ese día
       const pedidosDelDia = pedidos.filter(pedido => {
         const fechaPedido = new Date(pedido.fecha_creacion);
         return fechaPedido.toDateString() === fecha.toDateString();
@@ -306,7 +251,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     const labels: string[] = [];
     const data: number[] = [];
 
-    // Generar últimas 4 semanas
     for (let i = 3; i >= 0; i--) {
       const inicioSemana = new Date(hoy);
       inicioSemana.setDate(inicioSemana.getDate() - (i * 7 + 6));
@@ -316,7 +260,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
       labels.push(`Semana ${4 - i}`);
 
-      // Contar pedidos de esa semana
       const pedidosDeLaSemana = pedidos.filter(pedido => {
         const fechaPedido = new Date(pedido.fecha_creacion);
         return fechaPedido >= inicioSemana && fechaPedido <= finSemana;
@@ -334,12 +277,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     const data: number[] = [];
     const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
-    // Generar últimos 12 meses
     for (let i = 11; i >= 0; i--) {
       const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
       labels.push(meses[fecha.getMonth()]);
 
-      // Contar pedidos de ese mes
       const pedidosDelMes = pedidos.filter(pedido => {
         const fechaPedido = new Date(pedido.fecha_creacion);
         return fechaPedido.getMonth() === fecha.getMonth() &&
@@ -351,10 +292,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
     return { labels, data };
   }
-
-  // ============================================
-  // CONVERTIR PEDIDOS A ACTIVIDAD
-  // ============================================
 
   convertirPedidoAActividad(pedido: Pedido): ActividadReciente {
     const iconos = {
@@ -408,7 +345,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async loadUserData(): Promise<void> {
     try {
-      // Aquí después puedes obtener el usuario del token o localStorage
       this.usuario = {
         id: '1',
         nombre: 'Juan Pérez',
@@ -416,7 +352,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         rol: 'Administrador'
       };
     } catch (error) {
-      console.error('Error al cargar datos de usuario:', error);
     }
   }
 
@@ -431,19 +366,13 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.whatsappConnected = data.conectado;
       }
     } catch (error) {
-      console.error('Error verificando estado WhatsApp:', error);
       this.whatsappConnected = false;
     }
   }
 
-  // ============================================
-  // GRÁFICA DE PEDIDOS
-  // ============================================
-
   private initPedidosChart(): void {
     const canvas = document.getElementById('pedidosChart') as HTMLCanvasElement;
     if (!canvas) {
-      console.warn('Canvas pedidosChart no encontrado - esperando...');
       setTimeout(() => this.initPedidosChart(), 200);
       return;
     }
@@ -452,7 +381,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     if (!ctx) return;
 
     if (typeof Chart === 'undefined') {
-      console.error('Chart.js no está cargado. Agrega el script en index.html');
       return;
     }
 
@@ -545,8 +473,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         }
       }
     });
-
-    console.log('✅ Gráfica de pedidos inicializada con datos reales');
   }
 
   cambiarVistaPedidos(vista: string): void {
@@ -576,10 +502,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         return this.datosPorDia;
     }
   }
-
-  // ============================================
-  // NAVEGACIÓN Y UI
-  // ============================================
 
   toggleSidebar(): void {
     this.sidebarOpen = !this.sidebarOpen;
@@ -639,9 +561,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
     try {
       this.empresa.modulos[modulo] = !this.empresa.modulos[modulo];
-      console.log(`Módulo ${modulo} ${this.empresa.modulos[modulo] ? 'activado' : 'desactivado'}`);
     } catch (error) {
-      console.error('Error al actualizar módulo:', error);
       this.empresa.modulos[modulo] = !this.empresa.modulos[modulo];
     }
   }

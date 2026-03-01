@@ -122,9 +122,12 @@ export class Autenticacion {
   }
 
   // ==================== VERIFICAR EMAIL ====================
-  verificarEmail(token: string): Observable<any> {
-    return this.http.get(`${this.API_URL}/auth/verificar?token=${token}`);
-  }
+  verificarEmail(token: string) {
+  return this.http.get(
+    `${this.API_URL}/auth/verificar-email?token=${token}`
+  );
+}
+
 
   // ==================== RECUPERAR CONTRASEÑA ====================
   solicitarRecuperacion(correo: string): Observable<any> {

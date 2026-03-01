@@ -1,4 +1,5 @@
-// pedidos.component.ts - CÓDIGO COMPLETO CON DEBUG MEJORADO
+// pedidos.component.ts - VERSIÓN LIMPIA
+
 import { Component, OnInit, HostListener } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -16,45 +17,35 @@ import { SidebarComponent } from '../../componentes/aside/aside';
 })
 export class Pedidos implements OnInit {
 
-  // ==================== SIDEBAR DATA ====================
   sidebarOpen = true;
   empresa: any = null;
   usuario: any = null;
   currentRoute = 'pedidos';
 
-  // Datos del usuario
   empresaId: string = '';
   usuarioActual: any = null;
 
-  // Lista de pedidos
   pedidos: Pedido[] = [];
   pedidosFiltrados: Pedido[] = [];
 
-  // Estadísticas
   estadisticas: Estadisticas | null = null;
 
-  // Estados de carga
   cargando = false;
   actualizando = false;
 
-  // Filtros
   filtroEstado: 'todos' | 'pendiente' | 'en_proceso' | 'entregado' | 'cancelado' = 'todos';
   terminoBusqueda = '';
 
-  // Paginación
   paginaActual = 1;
   itemsPorPagina = 10;
   pedidosPaginados: Pedido[] = [];
 
-  // Modal de detalle
   mostrarModal = false;
   pedidoSeleccionado: Pedido | null = null;
   mostrarOpcionesEstado = false;
 
-  // Menu de estado en cards
   menuEstadoAbierto: number | null = null;
 
-  // Mensajes
   mensaje = {
     mostrar: false,
     tipo: 'success' as 'success' | 'error',
@@ -68,10 +59,8 @@ export class Pedidos implements OnInit {
     private pedidosService: PedidosService
   ) {}
 
-  // ==================== HOST LISTENER ====================
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
-    // Cerrar el menú de estado si se hace clic fuera de él
     const target = event.target as HTMLElement;
     if (!target.closest('.relative')) {
       this.menuEstadoAbierto = null;
@@ -82,9 +71,6 @@ export class Pedidos implements OnInit {
     this.empresaId = this.route.snapshot.paramMap.get('id') || '';
     this.usuarioActual = this.authService.getUsuario();
     this.usuario = this.usuarioActual;
-
-    console.log('🚀 Iniciando componente de pedidos');
-    console.log('📍 Empresa ID:', this.empresaId);
 
     this.empresa = {
       id: this.empresaId,
@@ -113,7 +99,6 @@ export class Pedidos implements OnInit {
     this.cargarEstadisticas();
   }
 
-  // ==================== SIDEBAR METHODS ====================
   toggleSidebar() {
     this.sidebarOpen = !this.sidebarOpen;
   }
@@ -126,72 +111,33 @@ export class Pedidos implements OnInit {
     this.authService.logout();
   }
 
-  // ==================== CARGAR DATOS - VERSIÓN CON DEBUG MEJORADO ====================
   cargarPedidos() {
-    console.log('📋 Cargando pedidos para empresa:', this.empresaId);
-    console.log('🔗 URL completa:', `http://localhost:3000/api/pedidos/empresa/${this.empresaId}`);
     this.cargando = true;
-
-    const incluirSinNombre = true;
 
     this.pedidosService.obtenerPedidos(
       this.empresaId,
       this.filtroEstado === 'todos' ? undefined : this.filtroEstado,
-      incluirSinNombre
+      true
     ).subscribe({
       next: (response) => {
-        console.log('✅ RESPUESTA COMPLETA:', response);
-        console.log('   ├─ success:', response.success);
-        console.log('   ├─ data existe:', !!response.data);
-        console.log('   ├─ data es array:', Array.isArray(response.data));
-        console.log('   └─ length:', response.data?.length);
-
         if (response.success && response.data) {
           this.pedidos = response.data;
-          console.log('📦 Pedidos cargados:', this.pedidos.length);
-
-          // Mostrar estructura del primer pedido
-          if (this.pedidos.length > 0) {
-            console.log('🔍 PRIMER PEDIDO COMPLETO:');
-            console.log(JSON.stringify(this.pedidos[0], null, 2));
-
-            console.log('🔍 ESTRUCTURA DEL PRIMER PEDIDO:');
-            console.log('   ├─ id:', this.pedidos[0].id);
-            console.log('   ├─ nombre_cliente:', this.pedidos[0].nombre_cliente);
-            console.log('   ├─ telefono_cliente:', this.pedidos[0].telefono_cliente);
-            console.log('   ├─ estado:', this.pedidos[0].estado);
-            console.log('   ├─ total:', this.pedidos[0].total);
-            console.log('   ├─ fecha_creacion:', this.pedidos[0].fecha_creacion);
-            console.log('   └─ items:', this.pedidos[0].items);
-          }
-
           this.aplicarFiltros();
         } else {
-          console.warn('⚠️ Respuesta sin datos válidos');
-          console.warn('   ├─ success:', response.success);
-          console.warn('   ├─ mensaje:', response.mensaje);
-          console.warn('   └─ error:', response.error);
           this.pedidos = [];
           this.aplicarFiltros();
         }
         this.cargando = false;
       },
       error: (error) => {
-        console.error('❌ ERROR COMPLETO:', error);
-        console.error('   ├─ status:', error.status);
-        console.error('   ├─ statusText:', error.statusText);
-        console.error('   ├─ message:', error.message);
-        console.error('   ├─ url:', error.url);
-        console.error('   └─ error:', error.error);
-
         let mensajeError = 'Error al cargar los pedidos';
 
         if (error.status === 0) {
-          mensajeError = 'No se puede conectar al servidor. ¿Está corriendo el backend?';
+          mensajeError = 'No se puede conectar al servidor';
         } else if (error.status === 404) {
-          mensajeError = 'Endpoint no encontrado. Verifica la URL del API';
+          mensajeError = 'Endpoint no encontrado';
         } else if (error.status === 500) {
-          mensajeError = 'Error en el servidor. Revisa los logs del backend';
+          mensajeError = 'Error en el servidor';
         } else if (error.error?.mensaje) {
           mensajeError = error.error.mensaje;
         }
@@ -205,31 +151,17 @@ export class Pedidos implements OnInit {
   }
 
   cargarEstadisticas() {
-    console.log('📊 Cargando estadísticas para empresa:', this.empresaId);
-
     this.pedidosService.obtenerEstadisticas(this.empresaId).subscribe({
       next: (response) => {
-        console.log('✅ Estadísticas recibidas:', response);
-
         if (response.success && response.data) {
           this.estadisticas = response.data;
-          console.log('📊 Estadísticas procesadas:', this.estadisticas);
-        } else {
-          console.warn('⚠️ Estadísticas sin datos');
         }
       },
-      error: (error) => {
-        console.error('❌ Error al cargar estadísticas:', error);
-      }
+      error: () => {}
     });
   }
 
-  // ==================== FILTROS Y BÚSQUEDA ====================
   aplicarFiltros() {
-    console.log('🔍 Aplicando filtros...');
-    console.log('   Término búsqueda:', this.terminoBusqueda);
-    console.log('   Total pedidos:', this.pedidos.length);
-
     let resultados = [...this.pedidos];
 
     if (this.terminoBusqueda.trim()) {
@@ -239,18 +171,14 @@ export class Pedidos implements OnInit {
         pedido.telefono_cliente?.toLowerCase().includes(termino) ||
         pedido.id.toString().includes(termino)
       );
-      console.log('   Después de búsqueda:', resultados.length);
     }
 
     this.pedidosFiltrados = resultados;
     this.paginaActual = 1;
     this.actualizarPaginacion();
-
-    console.log('✅ Filtros aplicados. Resultados:', this.pedidosFiltrados.length);
   }
 
   cambiarFiltroEstado(estado: typeof this.filtroEstado) {
-    console.log('🔄 Cambiando filtro de estado a:', estado);
     this.filtroEstado = estado;
     this.paginaActual = 1;
     this.cargarPedidos();
@@ -261,16 +189,10 @@ export class Pedidos implements OnInit {
     this.aplicarFiltros();
   }
 
-  // ==================== PAGINACIÓN ====================
   actualizarPaginacion() {
     const inicio = (this.paginaActual - 1) * this.itemsPorPagina;
     const fin = inicio + this.itemsPorPagina;
     this.pedidosPaginados = this.pedidosFiltrados.slice(inicio, fin);
-
-    console.log('📄 Paginación actualizada:');
-    console.log('   Página:', this.paginaActual);
-    console.log('   Items por página:', this.itemsPorPagina);
-    console.log('   Mostrando:', this.pedidosPaginados.length, 'pedidos');
   }
 
   get totalPaginas(): number {
@@ -321,29 +243,19 @@ export class Pedidos implements OnInit {
     return paginas;
   }
 
-  // ==================== ACCIONES ====================
   verDetalle(pedido: Pedido) {
-    console.log('👁️ Viendo detalle del pedido:', pedido.id);
-
     this.pedidosService.obtenerDetallePedido(pedido.id).subscribe({
       next: (response) => {
-        console.log('✅ Respuesta detalle pedido:', response);
-
         if (response.success && response.data) {
           this.pedidoSeleccionado = response.data;
-          console.log('✅ Detalle cargado:', this.pedidoSeleccionado);
-          console.log('   └─ Items:', this.pedidoSeleccionado.items);
-
           this.mostrarModal = true;
           this.mostrarOpcionesEstado = false;
           this.menuEstadoAbierto = null;
         } else {
-          console.error('❌ Respuesta sin datos de detalle');
           this.mostrarMensaje('error', 'No se pudo cargar el detalle del pedido');
         }
       },
-      error: (error) => {
-        console.error('❌ Error obteniendo detalle:', error);
+      error: () => {
         this.mostrarMensaje('error', 'Error al obtener el detalle del pedido');
       }
     });
@@ -358,16 +270,12 @@ export class Pedidos implements OnInit {
   }
 
   actualizarEstado(pedidoId: number, nuevoEstado: Pedido['estado']) {
-    console.log('🔄 Actualizando estado:', { pedidoId, nuevoEstado });
-
     this.actualizando = true;
     this.mostrarOpcionesEstado = false;
     this.menuEstadoAbierto = null;
 
     this.pedidosService.actualizarEstado(pedidoId, nuevoEstado).subscribe({
       next: (response) => {
-        console.log('✅ Respuesta actualización estado:', response);
-
         if (response.success) {
           this.mostrarMensaje('success', 'Estado actualizado correctamente');
           this.cargarPedidos();
@@ -376,15 +284,12 @@ export class Pedidos implements OnInit {
           if (this.pedidoSeleccionado && this.pedidoSeleccionado.id === pedidoId) {
             this.pedidoSeleccionado.estado = nuevoEstado;
           }
-          console.log('✅ Estado actualizado exitosamente');
         } else {
-          console.error('❌ Actualización falló:', response.mensaje);
           this.mostrarMensaje('error', response.mensaje || 'Error al actualizar el estado');
         }
         this.actualizando = false;
       },
-      error: (error) => {
-        console.error('❌ Error actualizando estado:', error);
+      error: () => {
         this.mostrarMensaje('error', 'Error al actualizar el estado');
         this.actualizando = false;
       }
@@ -397,7 +302,6 @@ export class Pedidos implements OnInit {
     this.mostrarOpcionesEstado = false;
   }
 
-  // ==================== UTILIDADES ====================
   formatearPrecio(precio: number): string {
     return this.pedidosService.formatearPrecio(precio);
   }
@@ -458,7 +362,6 @@ export class Pedidos implements OnInit {
   }
 
   mostrarMensaje(tipo: 'success' | 'error', texto: string) {
-    console.log(`💬 Mensaje [${tipo}]:`, texto);
     this.mensaje = { mostrar: true, tipo, texto };
     setTimeout(() => {
       this.mensaje.mostrar = false;

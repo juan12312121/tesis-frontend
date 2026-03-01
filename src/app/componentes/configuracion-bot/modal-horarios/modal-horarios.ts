@@ -24,7 +24,7 @@ export class ModalHorarios {
 
   @Output() close = new EventEmitter<void>();
   @Output() save = new EventEmitter<any>();
-  @Output() diaToggled = new EventEmitter<string>();
+  @Output() diaToggled = new EventEmitter<number>(); // ✅ CAMBIADO: de string a number
 
   onClose() {
     this.close.emit();
@@ -34,7 +34,7 @@ export class ModalHorarios {
     this.save.emit(this.configuracion);
   }
 
-  toggleDia(diaId: string) {
+  toggleDia(diaId: number) { // ✅ CAMBIADO: de string a number
     this.diaToggled.emit(diaId);
   }
 
