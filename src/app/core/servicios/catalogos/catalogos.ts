@@ -1,8 +1,15 @@
-// catalogos.service.ts
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Autenticacion } from '../autenticacion/autenticacion';
+
+// ── NUEVO: categoria ahora es un objeto, no un string enum ──
+export interface Categoria {
+  id: number;
+  nombre: string;
+  descripcion?: string | null;
+  activa?: boolean;
+}
 
 export interface CatalogoItem {
   id?: number;
@@ -15,18 +22,17 @@ export interface CatalogoItem {
 
   // Campos para PRODUCTOS
   stock?: number | null;
-  sku?: string | null;
   disponible?: boolean;
 
   // Campos para SERVICIOS
   duracion_minutos?: number | null;
   requiere_agendamiento?: boolean;
 
-  // Campos comunes
-  categoria?: string | null;
-  tags?: string | null;
-  notas_adicionales?: string | null;
+  // ── NUEVO: categoria_id en lugar del enum categoria ──
+  categoria_id?: number | null;
+  categoria?: Categoria | null;  // viene del include del backend
 
+  tags?: string | null;
   fecha_creacion?: string;
   fecha_actualizacion?: string;
 }
@@ -41,28 +47,16 @@ export interface CatalogoResponse {
 export interface EstadisticasCatalogo {
   success: boolean;
   data?: {
-    total_items: number;
-    total_productos: number;
-    total_servicios: number;
-    items_disponibles: number;
-    items_con_stock: number;
-    categorias: string[];
-    items_con_precio: number;
-    precio_promedio: string | null;
-    precio_minimo: string | null;
-    precio_maximo: string | null;
+    totalProductos: number;
+    totalServicios: number;
+    sinStock: number;
+    stockBajo: number;
   };
-}
-
-export interface CategoriaEnUso {
-  categoria: string;
-  total: number;
 }
 
 export interface CategoriasResponse {
   success: boolean;
-  total?: number;
-  data?: string[] | CategoriaEnUso[];
+  data?: Categoria[];
 }
 
 @Injectable({
@@ -78,52 +72,40 @@ export class Catalogos {
 
   // ==================== CATEGORÍAS ====================
 
-  // Obtener todas las categorías disponibles del ENUM
-  obtenerCategoriasDisponibles(): Observable<CategoriasResponse> {
-    return this.http.get<CategoriasResponse>(`${this.API_URL}/categorias-disponibles`, {
-      headers: this.authService.getAuthHeaders()
-    });
-  }
-
-  // Obtener categorías en uso por la empresa
-  obtenerCategoriasEnUso(): Observable<CategoriasResponse> {
+  // Obtener categorías reales de la empresa (tabla categorias_productos)
+  obtenerCategorias(): Observable<CategoriasResponse> {
     return this.http.get<CategoriasResponse>(`${this.API_URL}/categorias`, {
       headers: this.authService.getAuthHeaders()
     });
   }
 
-  // Agregar nueva categoría al ENUM
-  agregarCategoria(categoria: string): Observable<CatalogoResponse> {
-    return this.http.post<CatalogoResponse>(`${this.API_URL}/categorias`,
-      { categoria },
-      {
-        headers: this.authService.getAuthHeaders()
-      }
+  // Crear nueva categoría
+  agregarCategoria(nombre: string, descripcion?: string): Observable<CatalogoResponse> {
+    return this.http.post<CatalogoResponse>(
+      `${this.API_URL}/categorias`,
+      { nombre, descripcion },
+      { headers: this.authService.getAuthHeaders() }
     );
   }
 
-  // ==================== OBTENER TODO EL CATÁLOGO ====================
+  // Eliminar (desactivar) categoría
+  eliminarCategoria(id: number): Observable<CatalogoResponse> {
+    return this.http.delete<CatalogoResponse>(`${this.API_URL}/categorias/${id}`, {
+      headers: this.authService.getAuthHeaders()
+    });
+  }
+
+  // ==================== CATÁLOGO ====================
 
   obtenerCatalogo(params?: {
-    tipo_item?: 'producto' | 'servicio';
-    categoria?: string;
+    tipo?: 'producto' | 'servicio';
+    categoria_id?: number;
     disponible?: boolean;
-    orden?: 'nombre' | 'precio' | 'fecha' | 'categoria';
   }): Observable<CatalogoResponse> {
     let httpParams = new HttpParams();
-
-    if (params?.tipo_item) {
-      httpParams = httpParams.set('tipo_item', params.tipo_item);
-    }
-    if (params?.categoria) {
-      httpParams = httpParams.set('categoria', params.categoria);
-    }
-    if (params?.disponible !== undefined) {
-      httpParams = httpParams.set('disponible', params.disponible.toString());
-    }
-    if (params?.orden) {
-      httpParams = httpParams.set('orden', params.orden);
-    }
+    if (params?.tipo) httpParams = httpParams.set('tipo', params.tipo);
+    if (params?.categoria_id) httpParams = httpParams.set('categoria_id', params.categoria_id.toString());
+    if (params?.disponible !== undefined) httpParams = httpParams.set('disponible', params.disponible.toString());
 
     return this.http.get<CatalogoResponse>(this.API_URL, {
       headers: this.authService.getAuthHeaders(),
@@ -131,23 +113,17 @@ export class Catalogos {
     });
   }
 
-  // ==================== OBTENER ITEM POR ID ====================
-
   obtenerItem(id: number): Observable<CatalogoResponse> {
     return this.http.get<CatalogoResponse>(`${this.API_URL}/${id}`, {
       headers: this.authService.getAuthHeaders()
     });
   }
 
-  // ==================== CREAR NUEVO ITEM ====================
-
-  crearItem(item: Omit<CatalogoItem, 'id' | 'empresa_id' | 'fecha_creacion' | 'fecha_actualizacion'>): Observable<CatalogoResponse> {
+  crearItem(item: Omit<CatalogoItem, 'id' | 'empresa_id' | 'fecha_creacion' | 'fecha_actualizacion' | 'categoria'>): Observable<CatalogoResponse> {
     return this.http.post<CatalogoResponse>(this.API_URL, item, {
       headers: this.authService.getAuthHeaders()
     });
   }
-
-  // ==================== ACTUALIZAR ITEM ====================
 
   actualizarItem(id: number, item: Partial<CatalogoItem>): Observable<CatalogoResponse> {
     return this.http.put<CatalogoResponse>(`${this.API_URL}/${id}`, item, {
@@ -155,28 +131,19 @@ export class Catalogos {
     });
   }
 
-  // ==================== ELIMINAR ITEM ====================
-
   eliminarItem(id: number): Observable<CatalogoResponse> {
     return this.http.delete<CatalogoResponse>(`${this.API_URL}/${id}`, {
       headers: this.authService.getAuthHeaders()
     });
   }
 
-  // ==================== BUSCAR ITEMS ====================
-
   buscarItems(query: string, params?: {
-    tipo_item?: 'producto' | 'servicio';
-    categoria?: string;
+    tipo?: 'producto' | 'servicio';
+    categoria_id?: number;
   }): Observable<CatalogoResponse> {
-    let httpParams = new HttpParams().set('q', query);
-
-    if (params?.tipo_item) {
-      httpParams = httpParams.set('tipo_item', params.tipo_item);
-    }
-    if (params?.categoria) {
-      httpParams = httpParams.set('categoria', params.categoria);
-    }
+    let httpParams = new HttpParams().set('busqueda', query);
+    if (params?.tipo) httpParams = httpParams.set('tipo', params.tipo);
+    if (params?.categoria_id) httpParams = httpParams.set('categoria_id', params.categoria_id.toString());
 
     return this.http.get<CatalogoResponse>(`${this.API_URL}/buscar`, {
       headers: this.authService.getAuthHeaders(),
@@ -184,91 +151,40 @@ export class Catalogos {
     });
   }
 
-  // ==================== OBTENER ESTADÍSTICAS ====================
-
   obtenerEstadisticas(): Observable<EstadisticasCatalogo> {
     return this.http.get<EstadisticasCatalogo>(`${this.API_URL}/estadisticas`, {
       headers: this.authService.getAuthHeaders()
     });
   }
 
-  // ==================== FILTROS ESPECÍFICOS ====================
-
-  obtenerProductos(params?: { categoria?: string; disponible?: boolean }): Observable<CatalogoResponse> {
-    return this.obtenerCatalogo({
-      tipo_item: 'producto',
-      ...params
+  actualizarStock(id: number, stock: number): Observable<CatalogoResponse> {
+    return this.http.patch<CatalogoResponse>(`${this.API_URL}/${id}/stock`, { stock }, {
+      headers: this.authService.getAuthHeaders()
     });
   }
 
-  obtenerServicios(params?: { categoria?: string; disponible?: boolean }): Observable<CatalogoResponse> {
-    return this.obtenerCatalogo({
-      tipo_item: 'servicio',
-      ...params
-    });
+  // ==================== FILTROS ====================
+  obtenerProductos(params?: { categoria_id?: number; disponible?: boolean }): Observable<CatalogoResponse> {
+    return this.obtenerCatalogo({ tipo: 'producto', ...params });
   }
 
-  obtenerPorCategoria(categoria: string): Observable<CatalogoResponse> {
-    return this.obtenerCatalogo({ categoria });
-  }
-
-  obtenerDisponibles(): Observable<CatalogoResponse> {
-    return this.obtenerCatalogo({ disponible: true });
+  obtenerServicios(params?: { categoria_id?: number; disponible?: boolean }): Observable<CatalogoResponse> {
+    return this.obtenerCatalogo({ tipo: 'servicio', ...params });
   }
 
   // ==================== UTILIDADES ====================
-
-  tienePrecio(item: CatalogoItem): boolean {
-    return item.precio !== null && item.precio !== undefined && item.precio > 0;
-  }
-
   formatearPrecio(precio: number | null | undefined): string {
     if (!precio) return 'Sin precio';
-    return new Intl.NumberFormat('es-MX', {
-      style: 'currency',
-      currency: 'MXN'
-    }).format(precio);
-  }
-
-  esProducto(item: CatalogoItem): boolean {
-    return item.tipo_item === 'producto';
-  }
-
-  esServicio(item: CatalogoItem): boolean {
-    return item.tipo_item === 'servicio';
-  }
-
-  tieneStock(item: CatalogoItem): boolean {
-    return item.stock !== null && item.stock !== undefined && item.stock > 0;
-  }
-
-  estaDisponible(item: CatalogoItem): boolean {
-    return item.disponible === true;
+    return new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN' }).format(precio);
   }
 
   formatearDuracion(minutos: number | null | undefined): string {
     if (!minutos) return 'No especificada';
-
     const horas = Math.floor(minutos / 60);
     const mins = minutos % 60;
-
-    if (horas > 0 && mins > 0) {
-      return `${horas}h ${mins}min`;
-    } else if (horas > 0) {
-      return `${horas}h`;
-    } else {
-      return `${mins}min`;
-    }
-  }
-
-  formatearCategoria(categoria: string | null | undefined): string {
-    if (!categoria) return 'Sin categoría';
-
-    // Convertir snake_case a formato legible
-    return categoria
-      .split('_')
-      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ');
+    if (horas > 0 && mins > 0) return `${horas}h ${mins}min`;
+    if (horas > 0) return `${horas}h`;
+    return `${mins}min`;
   }
 
   obtenerTags(item: CatalogoItem): string[] {
@@ -276,58 +192,8 @@ export class Catalogos {
     return item.tags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
   }
 
-  validarItem(item: Partial<CatalogoItem>): { valido: boolean; errores: string[] } {
-    const errores: string[] = [];
-
-    if (!item.nombre_item || item.nombre_item.trim() === '') {
-      errores.push('El nombre del item es obligatorio');
-    }
-
-    if (item.nombre_item && item.nombre_item.length > 255) {
-      errores.push('El nombre no puede exceder 255 caracteres');
-    }
-
-    if (item.tipo_item && !['producto', 'servicio'].includes(item.tipo_item)) {
-      errores.push('El tipo debe ser "producto" o "servicio"');
-    }
-
-    if (item.precio && item.precio < 0) {
-      errores.push('El precio no puede ser negativo');
-    }
-
-    if (item.stock && item.stock < 0) {
-      errores.push('El stock no puede ser negativo');
-    }
-
-    if (item.duracion_minutos && item.duracion_minutos <= 0) {
-      errores.push('La duración debe ser mayor a 0 minutos');
-    }
-
-    // Validaciones específicas por tipo
-    if (item.tipo_item === 'producto') {
-      if (item.stock === null || item.stock === undefined) {
-        errores.push('Los productos deben tener stock definido');
-      }
-    }
-
-    if (item.tipo_item === 'servicio') {
-      if (!item.duracion_minutos) {
-        errores.push('Los servicios deben tener duración definida');
-      }
-    }
-
-    return {
-      valido: errores.length === 0,
-      errores
-    };
-  }
-
-  // Validar SKU único (puedes implementar validación contra el backend)
-  validarSKU(sku: string): Observable<boolean> {
-    // Implementar si necesitas validación de SKU único
-    return new Observable(observer => {
-      observer.next(true);
-      observer.complete();
-    });
-  }
+  esProducto(item: CatalogoItem): boolean { return item.tipo_item === 'producto'; }
+  esServicio(item: CatalogoItem): boolean { return item.tipo_item === 'servicio'; }
+  tieneStock(item: CatalogoItem): boolean { return (item.stock ?? 0) > 0; }
+  estaDisponible(item: CatalogoItem): boolean { return item.disponible === true; }
 }

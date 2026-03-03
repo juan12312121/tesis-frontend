@@ -2,7 +2,7 @@
 import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { CatalogoItem } from '../../core/servicios/catalogos/catalogos';
+import { CatalogoItem, Categoria } from '../../core/servicios/catalogos/catalogos';
 
 @Component({
   selector: 'app-modal-agregar',
@@ -14,19 +14,16 @@ import { CatalogoItem } from '../../core/servicios/catalogos/catalogos';
 export class ModalAgregar {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
-  // ==================== INPUTS ====================
   @Input() mostrarModal = false;
   @Input() modoEdicion = false;
   @Input() itemActual: Partial<CatalogoItem> = {};
-  @Input() categoriasDisponibles: string[] = [];
+  // ✅ CORREGIDO: ahora es Categoria[] en lugar de string[]
+  @Input() categoriasDisponibles: Categoria[] = [];
   @Input() guardando = false;
   @Input() imagenPreview: string | null = null;
-
-  // NUEVO: Configuración de tipos habilitados
   @Input() productosHabilitados = true;
   @Input() serviciosHabilitados = true;
 
-  // ==================== OUTPUTS ====================
   @Output() cerrarModalEvent = new EventEmitter<void>();
   @Output() guardarItemEvent = new EventEmitter<void>();
   @Output() onFileSelectedEvent = new EventEmitter<any>();
@@ -34,51 +31,17 @@ export class ModalAgregar {
   @Output() cancelarImagenNuevaEvent = new EventEmitter<void>();
   @Output() abrirSelectorArchivoEvent = new EventEmitter<void>();
 
-  // ==================== MÉTODOS ====================
-  cerrarModal() {
-    this.cerrarModalEvent.emit();
-  }
+  cerrarModal() { this.cerrarModalEvent.emit(); }
+  guardarItem() { this.guardarItemEvent.emit(); }
+  onFileSelected(event: any) { this.onFileSelectedEvent.emit(event); }
+  eliminarImagenActual() { this.eliminarImagenActualEvent.emit(); }
+  cancelarImagenNueva() { this.cancelarImagenNuevaEvent.emit(); }
+  abrirSelectorArchivo() { this.abrirSelectorArchivoEvent.emit(); }
+  stopPropagation(event: Event) { event.stopPropagation(); }
 
-  guardarItem() {
-    this.guardarItemEvent.emit();
-  }
-
-  onFileSelected(event: any) {
-    this.onFileSelectedEvent.emit(event);
-  }
-
-  eliminarImagenActual() {
-    this.eliminarImagenActualEvent.emit();
-  }
-
-  cancelarImagenNueva() {
-    this.cancelarImagenNuevaEvent.emit();
-  }
-
-  abrirSelectorArchivo() {
-    this.abrirSelectorArchivoEvent.emit();
-  }
-
-  formatearCategoria(categoria: string | null | undefined): string {
-    if (!categoria) return 'Sin categoría';
-    return categoria
-      .split('_')
-      .map(palabra => palabra.charAt(0).toUpperCase() + palabra.slice(1).toLowerCase())
-      .join(' ');
-  }
-
-  // Prevenir cierre del modal al hacer click dentro
-  stopPropagation(event: Event) {
-    event.stopPropagation();
-  }
-
-  // Verificar si el tipo actual está habilitado
   get tipoActualHabilitado(): boolean {
-    if (this.itemActual.tipo_item === 'producto') {
-      return this.productosHabilitados;
-    } else if (this.itemActual.tipo_item === 'servicio') {
-      return this.serviciosHabilitados;
-    }
+    if (this.itemActual.tipo_item === 'producto') return this.productosHabilitados;
+    if (this.itemActual.tipo_item === 'servicio') return this.serviciosHabilitados;
     return true;
   }
 }

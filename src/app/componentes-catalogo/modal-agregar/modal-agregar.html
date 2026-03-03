@@ -28,9 +28,7 @@
             <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
           </div>
           <div class="ml-3">
-            <p class="text-sm font-bold text-yellow-800">
-              ⚠️ Tipo de item deshabilitado
-            </p>
+            <p class="text-sm font-bold text-yellow-800">⚠️ Tipo de item deshabilitado</p>
             <p class="text-xs text-yellow-700 mt-1">
               Los <strong>{{ itemActual.tipo_item === 'producto' ? 'productos' : 'servicios' }}</strong> están deshabilitados en tu configuración.
               Este item no será visible en el catálogo público hasta que habilites este tipo.
@@ -42,6 +40,7 @@
       <!-- FORMULARIO -->
       <form (ngSubmit)="guardarItem()" class="p-4 sm:p-6">
         <div class="space-y-4">
+
           <!-- Nombre -->
           <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">
@@ -95,38 +94,18 @@
               <span>Información del Producto</span>
             </h4>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <!-- Stock -->
-              <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">
-                  Stock Disponible
-                </label>
-                <input
-                  type="number"
-                  [(ngModel)]="itemActual.stock"
-                  name="stock"
-                  min="0"
-                  placeholder="0"
-                  class="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-sm sm:text-base"
-                >
-                <p class="mt-1 text-xs text-gray-500">Cantidad en inventario</p>
-              </div>
-
-              <!-- SKU -->
-              <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">
-                  SKU / Código
-                </label>
-                <input
-                  type="text"
-                  [(ngModel)]="itemActual.sku"
-                  name="sku"
-                  maxlength="100"
-                  placeholder="Ej: PROD-001"
-                  class="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-sm sm:text-base"
-                >
-                <p class="mt-1 text-xs text-gray-500">Código único del producto</p>
-              </div>
+            <!-- Stock -->
+            <div>
+              <label class="block text-sm font-bold text-gray-700 mb-2">Stock Disponible</label>
+              <input
+                type="number"
+                [(ngModel)]="itemActual.stock"
+                name="stock"
+                min="0"
+                placeholder="0"
+                class="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-sm sm:text-base"
+              >
+              <p class="mt-1 text-xs text-gray-500">Cantidad en inventario</p>
             </div>
           </div>
 
@@ -140,9 +119,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <!-- Duración -->
               <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">
-                  Duración (minutos)
-                </label>
+                <label class="block text-sm font-bold text-gray-700 mb-2">Duración (minutos)</label>
                 <input
                   type="number"
                   [(ngModel)]="itemActual.duracion_minutos"
@@ -156,28 +133,14 @@
 
               <!-- Requiere Agendamiento -->
               <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">
-                  ¿Requiere agendamiento?
-                </label>
+                <label class="block text-sm font-bold text-gray-700 mb-2">¿Requiere agendamiento?</label>
                 <div class="flex items-center space-x-4 mt-3">
                   <label class="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      [(ngModel)]="itemActual.requiere_agendamiento"
-                      name="agendamiento"
-                      [value]="true"
-                      class="w-4 h-4 text-purple-600 focus:ring-purple-500"
-                    >
+                    <input type="radio" [(ngModel)]="itemActual.requiere_agendamiento" name="agendamiento" [value]="true" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
                     <span class="text-sm font-medium text-gray-700">Sí</span>
                   </label>
                   <label class="flex items-center space-x-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      [(ngModel)]="itemActual.requiere_agendamiento"
-                      name="agendamiento"
-                      [value]="false"
-                      class="w-4 h-4 text-purple-600 focus:ring-purple-500"
-                    >
+                    <input type="radio" [(ngModel)]="itemActual.requiere_agendamiento" name="agendamiento" [value]="false" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
                     <span class="text-sm font-medium text-gray-700">No</span>
                   </label>
                 </div>
@@ -186,17 +149,17 @@
             </div>
           </div>
 
-          <!-- Categoría -->
+          <!-- ✅ CORREGIDO: Categoría ahora usa categoria_id con objetos {id, nombre} -->
           <div>
             <label class="block text-sm font-bold text-gray-700 mb-2">Categoría</label>
             <select
-              [(ngModel)]="itemActual.categoria"
-              name="categoria"
+              [(ngModel)]="itemActual.categoria_id"
+              name="categoria_id"
               class="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-sm sm:text-base"
             >
               <option [ngValue]="null">Sin categoría</option>
-              <option *ngFor="let cat of categoriasDisponibles" [value]="cat">
-                {{ formatearCategoria(cat) }}
+              <option *ngFor="let cat of categoriasDisponibles" [value]="cat.id">
+                {{ cat.nombre }}
               </option>
             </select>
             <p class="mt-1 text-xs text-gray-500">Opcional - Organiza tus items</p>
@@ -218,29 +181,12 @@
           <!-- Disponibilidad -->
           <div class="flex items-center space-x-3">
             <label class="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                [(ngModel)]="itemActual.disponible"
-                name="disponible"
-                class="sr-only peer"
-              >
+              <input type="checkbox" [(ngModel)]="itemActual.disponible" name="disponible" class="sr-only peer">
               <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
             <span class="text-sm font-bold text-gray-700">
               {{ itemActual.disponible ? 'Disponible' : 'No disponible' }}
             </span>
-          </div>
-
-          <!-- Notas Adicionales -->
-          <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">Notas Adicionales</label>
-            <textarea
-              [(ngModel)]="itemActual.notas_adicionales"
-              name="notas"
-              rows="3"
-              placeholder="Información adicional, condiciones, etc..."
-              class="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium resize-none text-sm sm:text-base"
-            ></textarea>
           </div>
 
           <!-- Imagen -->
@@ -250,10 +196,7 @@
             <div *ngIf="itemActual.imagen_url && !imagenPreview" class="mb-3">
               <div class="relative inline-block">
                 <img [src]="itemActual.imagen_url" alt="Imagen actual" class="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-lg border-2 border-gray-200">
-                <button
-                  type="button"
-                  (click)="eliminarImagenActual()"
-                  class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition">
+                <button type="button" (click)="eliminarImagenActual()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition">
                   <i class="fas fa-times text-xs"></i>
                 </button>
               </div>
@@ -263,10 +206,7 @@
             <div *ngIf="imagenPreview" class="mb-3">
               <div class="relative inline-block">
                 <img [src]="imagenPreview" alt="Vista previa" class="h-24 w-24 sm:h-32 sm:w-32 object-cover rounded-lg border-2 border-blue-300">
-                <button
-                  type="button"
-                  (click)="cancelarImagenNueva()"
-                  class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition">
+                <button type="button" (click)="cancelarImagenNueva()" class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition">
                   <i class="fas fa-times text-xs"></i>
                 </button>
               </div>
@@ -274,31 +214,17 @@
             </div>
 
             <div *ngIf="!itemActual.imagen_url || imagenPreview" class="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 text-center hover:border-blue-400 transition">
-              <input
-                type="file"
-                #fileInput
-                (change)="onFileSelected($event)"
-                accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-                class="hidden"
-                id="file-input"
-              >
+              <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="hidden" id="file-input">
               <label for="file-input" class="cursor-pointer">
                 <div class="flex flex-col items-center space-y-2">
                   <i class="fas fa-cloud-upload-alt text-3xl sm:text-4xl text-gray-400"></i>
-                  <p class="text-xs sm:text-sm font-semibold text-gray-700">
-                    Click para seleccionar imagen
-                  </p>
-                  <p class="text-xs text-gray-500">
-                    JPG, PNG, GIF o WEBP (máx. 5MB)
-                  </p>
+                  <p class="text-xs sm:text-sm font-semibold text-gray-700">Click para seleccionar imagen</p>
+                  <p class="text-xs text-gray-500">JPG, PNG, GIF o WEBP (máx. 5MB)</p>
                 </div>
               </label>
             </div>
 
-            <button
-              *ngIf="itemActual.imagen_url && !imagenPreview"
-              type="button"
-              (click)="abrirSelectorArchivo()"
+            <button *ngIf="itemActual.imagen_url && !imagenPreview" type="button" (click)="abrirSelectorArchivo()"
               class="mt-2 w-full bg-gray-100 text-gray-700 font-semibold py-2 px-4 rounded-lg hover:bg-gray-200 transition flex items-center justify-center space-x-2 text-sm">
               <i class="fas fa-image"></i>
               <span>Cambiar imagen</span>
@@ -308,10 +234,7 @@
 
         <!-- BOTONES -->
         <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mt-6 pt-6 border-t border-gray-200">
-          <button
-            type="button"
-            (click)="cerrarModal()"
-            class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition">
+          <button type="button" (click)="cerrarModal()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition">
             Cancelar
           </button>
           <button

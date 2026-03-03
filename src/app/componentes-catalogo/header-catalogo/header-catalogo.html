@@ -14,6 +14,15 @@
     </div>
 
     <div class="flex items-center space-x-2 sm:space-x-3">
+
+      <!-- ✅ Botón Categorías -->
+      <button
+        (click)="gestionarCategorias()"
+        class="hidden sm:flex items-center space-x-2 px-3 sm:px-4 py-2 bg-indigo-50 text-indigo-700 font-semibold rounded-lg hover:bg-indigo-100 transition border border-indigo-200">
+        <i class="fas fa-tags"></i>
+        <span class="hidden md:inline">Categorías</span>
+      </button>
+
       <!-- Botón Configuración -->
       <button
         (click)="irAConfiguracion()"
@@ -45,15 +54,10 @@
       >
       <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
       <div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-2">
-        <button
-          *ngIf="terminoBusqueda"
-          (click)="limpiarBusqueda()"
-          class="text-gray-400 hover:text-gray-600">
+        <button *ngIf="terminoBusqueda" (click)="limpiarBusqueda()" class="text-gray-400 hover:text-gray-600">
           <i class="fas fa-times"></i>
         </button>
-        <button
-          (click)="buscar()"
-          class="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 text-sm">
+        <button (click)="buscar()" class="bg-blue-600 text-white px-3 py-1 rounded-md hover:bg-blue-700 text-sm">
           Buscar
         </button>
       </div>
@@ -63,53 +67,34 @@
   <!-- Filters -->
   <div class="px-4 sm:px-6 pb-4">
     <div class="flex flex-col sm:flex-row gap-3">
-      <!-- Filtro de Tipo (AHORA CON VALIDACIÓN) -->
+
+      <!-- Filtro Tipo -->
       <div class="flex-1">
         <label class="block text-xs font-bold text-gray-700 mb-1">Tipo</label>
         <div class="flex space-x-2">
-          <!-- Todos (solo si ambos están habilitados) -->
-          <button
-            *ngIf="mostrarFiltroTodos"
-            (click)="cambiarFiltroTipo('todos')"
+          <button *ngIf="mostrarFiltroTodos" (click)="cambiarFiltroTipo('todos')"
             [class]="'flex-1 py-2 px-3 rounded-lg font-semibold text-sm transition ' +
-                     (filtroTipo === 'todos'
-                       ? 'bg-blue-600 text-white'
-                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200')">
+                     (filtroTipo === 'todos' ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')">
             Todos
           </button>
-
-          <!-- Productos (solo si están habilitados) -->
-          <button
-            *ngIf="mostrarFiltroProductos"
-            (click)="cambiarFiltroTipo('producto')"
+          <button *ngIf="mostrarFiltroProductos" (click)="cambiarFiltroTipo('producto')"
             [class]="'flex-1 py-2 px-3 rounded-lg font-semibold text-sm transition ' +
-                     (filtroTipo === 'producto'
-                       ? 'bg-green-600 text-white'
-                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200')">
+                     (filtroTipo === 'producto' ? 'bg-green-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')">
             <i class="fas fa-box mr-1"></i> Productos
           </button>
-
-          <!-- Servicios (solo si están habilitados) -->
-          <button
-            *ngIf="mostrarFiltroServicios"
-            (click)="cambiarFiltroTipo('servicio')"
+          <button *ngIf="mostrarFiltroServicios" (click)="cambiarFiltroTipo('servicio')"
             [class]="'flex-1 py-2 px-3 rounded-lg font-semibold text-sm transition ' +
-                     (filtroTipo === 'servicio'
-                       ? 'bg-purple-600 text-white'
-                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200')">
+                     (filtroTipo === 'servicio' ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200')">
             <i class="fas fa-tools mr-1"></i> Servicios
           </button>
-
-          <!-- Mensaje si ambos deshabilitados -->
           <div *ngIf="!mostrarFiltroProductos && !mostrarFiltroServicios"
                class="flex-1 py-2 px-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 text-center">
-            <i class="fas fa-exclamation-triangle mr-1"></i>
-            Ambos tipos deshabilitados
+            <i class="fas fa-exclamation-triangle mr-1"></i> Ambos tipos deshabilitados
           </div>
         </div>
       </div>
 
-      <!-- Filtro de Categoría -->
+      <!-- ✅ Filtro Categoría — ahora usa cat.id y cat.nombre -->
       <div class="flex-1">
         <label class="block text-xs font-bold text-gray-700 mb-1">Categoría</label>
         <select
@@ -117,11 +102,11 @@
           (change)="cambiarFiltroCategoria(filtroCategoria)"
           class="w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
           <option value="todas">Todas</option>
-          <option *ngFor="let cat of categoriasDisponibles" [value]="cat">{{ cat }}</option>
+          <option *ngFor="let cat of categoriasDisponibles" [value]="cat.id">{{ cat.nombre }}</option>
         </select>
       </div>
 
-      <!-- Filtro de Disponibilidad -->
+      <!-- Filtro Disponibilidad -->
       <div class="flex-1">
         <label class="block text-xs font-bold text-gray-700 mb-1">Disponibilidad</label>
         <select
@@ -147,6 +132,7 @@
           <option value="categoria">Categoría</option>
         </select>
       </div>
+
     </div>
   </div>
 </header>

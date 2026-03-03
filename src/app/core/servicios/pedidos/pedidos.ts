@@ -1,4 +1,3 @@
-// core/servicios/pedidos/pedidos.service.ts - COMPLETO CON WHATSAPP Y TOKEN
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';

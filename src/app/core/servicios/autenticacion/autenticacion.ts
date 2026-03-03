@@ -29,6 +29,12 @@ interface AuthResponse {
     email: string;
     rol: string;
     empresa_id: string;
+    empresa?: {
+      id: string;
+      nombre: string;
+      tipo_negocio: 'productos' | 'servicios' | null;
+      onboarding_completado: boolean;
+    };
   };
 }
 
@@ -38,7 +44,6 @@ interface AuthResponse {
 export class Autenticacion {
   private readonly API_URL = 'http://localhost:3000/api';
 
-  // BehaviorSubject para manejar el estado de autenticación
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();
 
@@ -103,6 +108,39 @@ export class Autenticacion {
     return this.hasToken();
   }
 
+  // ── NUEVO ──────────────────────────────────────────────────
+  // Lee tipo_negocio del objeto usuario guardado en localStorage.
+  // Lo usa el frontend para personalizar la UI sin hacer un GET extra.
+  getTipoNegocio(): 'productos' | 'servicios' | null {
+    return this.getUsuario()?.empresa?.tipo_negocio ?? null;
+  }
+
+  esNegocioProductos(): boolean {
+    return this.getTipoNegocio() === 'productos';
+  }
+
+  esNegocioServicios(): boolean {
+    return this.getTipoNegocio() === 'servicios';
+  }
+
+  onboardingCompletado(): boolean {
+    return this.getUsuario()?.empresa?.onboarding_completado === true;
+  }
+
+  // Actualiza el usuario en localStorage después del onboarding
+  // sin necesidad de hacer logout/login
+  actualizarTipoNegocio(tipo_negocio: 'productos' | 'servicios'): void {
+    const usuario = this.getUsuario();
+    if (usuario) {
+      if (!usuario.empresa) usuario.empresa = {};
+      usuario.empresa.tipo_negocio = tipo_negocio;
+      usuario.empresa.onboarding_completado = true;
+      localStorage.setItem('usuario', JSON.stringify(usuario));
+      this.currentUserSubject.next(usuario);
+    }
+  }
+  // ── FIN NUEVO ──────────────────────────────────────────────
+
   private hasToken(): boolean {
     return !!localStorage.getItem('token');
   }
@@ -123,11 +161,8 @@ export class Autenticacion {
 
   // ==================== VERIFICAR EMAIL ====================
   verificarEmail(token: string) {
-  return this.http.get(
-    `${this.API_URL}/auth/verificar-email?token=${token}`
-  );
-}
-
+    return this.http.get(`${this.API_URL}/auth/verificar-email?token=${token}`);
+  }
 
   // ==================== RECUPERAR CONTRASEÑA ====================
   solicitarRecuperacion(correo: string): Observable<any> {
@@ -135,9 +170,6 @@ export class Autenticacion {
   }
 
   cambiarPassword(token: string, nuevaPassword: string): Observable<any> {
-    return this.http.post(`${this.API_URL}/auth/cambiar-password`, {
-      token,
-      nuevaPassword
-    });
+    return this.http.post(`${this.API_URL}/auth/cambiar-password`, { token, nuevaPassword });
   }
 }

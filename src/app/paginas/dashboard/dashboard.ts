@@ -6,6 +6,7 @@ import { FormsModule } from '@angular/forms';
 import { SidebarComponent } from '../../componentes/aside/aside';
 import { WhatsappStatus } from '../../componentes/whatsapp-status/whatsapp-status';
 import { Pedidos, Pedido, Estadisticas } from '../../core/servicios/pedidos/pedidos';
+import { Autenticacion } from '../../core/servicios/autenticacion/autenticacion';
 
 declare const Chart: any;
 
@@ -57,6 +58,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private http = inject(HttpClient);
   private pedidosService = inject(Pedidos);
+  private authService = inject(Autenticacion);
 
   private readonly API_URL = 'http://localhost:3000/api';
 
@@ -83,33 +85,26 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   whatsappConnected: boolean = false;
   conversacionesActivas: number = 0;
 
-  private datosPorDia = {
-    labels: [] as string[],
-    data: [] as number[]
-  };
-
-  private datosPorSemana = {
-    labels: [] as string[],
-    data: [] as number[]
-  };
-
-  private datosPorMes = {
-    labels: [] as string[],
-    data: [] as number[]
-  };
+  private datosPorDia = { labels: [] as string[], data: [] as number[] };
+  private datosPorSemana = { labels: [] as string[], data: [] as number[] };
+  private datosPorMes = { labels: [] as string[], data: [] as number[] };
 
   ngOnInit(): void {
+    this.loadUserData();
+
     this.route.params.subscribe(params => {
       this.empresaId = params['id'];
       if (this.empresaId) {
+        if (!this.authService.onboardingCompletado()) {
+          this.router.navigate(['/onboarding', this.empresaId]);
+          return;
+        }
         this.loadEmpresaData();
         this.verificarEstadoWhatsApp();
       } else {
         this.router.navigate(['/seleccionar-empresa']);
       }
     });
-
-    this.loadUserData();
   }
 
   ngAfterViewInit(): void {
@@ -137,10 +132,16 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cargarDatosGrafica()
       ]);
 
+      // ✅ Leer tipo_negocio del JWT en lugar de hardcodear
+      const usuarioJWT = this.authService.getUsuario();
+      const tipoNegocio = usuarioJWT?.empresa?.tipo_negocio;
+      const tipoLabel = tipoNegocio === 'productos' ? 'Productos' :
+                        tipoNegocio === 'servicios' ? 'Servicios' : 'Empresa';
+
       this.empresa = {
         id: this.empresaId,
-        nombre: 'Mi Empresa',
-        tipo: 'Restaurante',
+        nombre: usuarioJWT?.empresa?.nombre || 'Mi Empresa',
+        tipo: tipoLabel,
         modulos: {
           pedidos: true,
           reservas: true,
@@ -161,18 +162,14 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         next: (response) => {
           if (response.success && response.data) {
             this.pedidosRecientes = this.pedidosService.ordenarPorFecha(response.data);
-
             this.actividadReciente = this.pedidosRecientes
               .slice(0, 5)
               .map(pedido => this.convertirPedidoAActividad(pedido));
           }
         },
-        error: () => {
-          this.actividadReciente = [];
-        }
+        error: () => { this.actividadReciente = []; }
       });
-    } catch (error) {
-    }
+    } catch (error) {}
   }
 
   async cargarEstadisticas(): Promise<void> {
@@ -184,11 +181,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
             this.totalPedidos = response.data.totales.total_pedidos;
           }
         },
-        error: () => {
-        }
+        error: () => {}
       });
-    } catch (error) {
-    }
+    } catch (error) {}
   }
 
   async cargarDatosGrafica(): Promise<void> {
@@ -216,11 +211,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           }
         },
-        error: () => {
-        }
+        error: () => {}
       });
-    } catch (error) {
-    }
+    } catch (error) {}
   }
 
   procesarDatosPorDia(pedidos: Pedido[]): { labels: string[], data: number[] } {
@@ -231,16 +224,8 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     for (let i = 13; i >= 0; i--) {
       const fecha = new Date(hoy);
       fecha.setDate(fecha.getDate() - i);
-
-      const dia = fecha.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' });
-      labels.push(dia);
-
-      const pedidosDelDia = pedidos.filter(pedido => {
-        const fechaPedido = new Date(pedido.fecha_creacion);
-        return fechaPedido.toDateString() === fecha.toDateString();
-      }).length;
-
-      data.push(pedidosDelDia);
+      labels.push(fecha.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' }));
+      data.push(pedidos.filter(p => new Date(p.fecha_creacion).toDateString() === fecha.toDateString()).length);
     }
 
     return { labels, data };
@@ -254,18 +239,13 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     for (let i = 3; i >= 0; i--) {
       const inicioSemana = new Date(hoy);
       inicioSemana.setDate(inicioSemana.getDate() - (i * 7 + 6));
-
       const finSemana = new Date(inicioSemana);
       finSemana.setDate(finSemana.getDate() + 6);
-
       labels.push(`Semana ${4 - i}`);
-
-      const pedidosDeLaSemana = pedidos.filter(pedido => {
-        const fechaPedido = new Date(pedido.fecha_creacion);
-        return fechaPedido >= inicioSemana && fechaPedido <= finSemana;
-      }).length;
-
-      data.push(pedidosDeLaSemana);
+      data.push(pedidos.filter(p => {
+        const f = new Date(p.fecha_creacion);
+        return f >= inicioSemana && f <= finSemana;
+      }).length);
     }
 
     return { labels, data };
@@ -275,54 +255,30 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     const hoy = new Date();
     const labels: string[] = [];
     const data: number[] = [];
-    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
     for (let i = 11; i >= 0; i--) {
       const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
       labels.push(meses[fecha.getMonth()]);
-
-      const pedidosDelMes = pedidos.filter(pedido => {
-        const fechaPedido = new Date(pedido.fecha_creacion);
-        return fechaPedido.getMonth() === fecha.getMonth() &&
-               fechaPedido.getFullYear() === fecha.getFullYear();
-      }).length;
-
-      data.push(pedidosDelMes);
+      data.push(pedidos.filter(p => {
+        const f = new Date(p.fecha_creacion);
+        return f.getMonth() === fecha.getMonth() && f.getFullYear() === fecha.getFullYear();
+      }).length);
     }
 
     return { labels, data };
   }
 
   convertirPedidoAActividad(pedido: Pedido): ActividadReciente {
-    const iconos = {
-      'pendiente': 'fa-clock',
-      'en_proceso': 'fa-spinner',
-      'entregado': 'fa-check-circle',
-      'cancelado': 'fa-times-circle'
-    };
-
-    const colores = {
-      'pendiente': 'yellow',
-      'en_proceso': 'blue',
-      'entregado': 'green',
-      'cancelado': 'red'
-    };
-
-    const estados = {
-      'pendiente': 'Pendiente',
-      'en_proceso': 'En Proceso',
-      'entregado': 'Entregado',
-      'cancelado': 'Cancelado'
-    };
-
-    const tiempoTranscurrido = this.calcularTiempoTranscurrido(new Date(pedido.fecha_creacion));
-    const telefonoFormateado = this.pedidosService.formatearTelefono(pedido.telefono_cliente);
+    const iconos: any = { pendiente: 'fa-clock', en_proceso: 'fa-spinner', entregado: 'fa-check-circle', cancelado: 'fa-times-circle' };
+    const colores: any = { pendiente: 'yellow', en_proceso: 'blue', entregado: 'green', cancelado: 'red' };
+    const estados: any = { pendiente: 'Pendiente', en_proceso: 'En Proceso', entregado: 'Entregado', cancelado: 'Cancelado' };
 
     return {
       id: pedido.id,
       tipo: 'pedido',
       titulo: pedido.nombre_cliente || 'Cliente sin nombre',
-      descripcion: `${telefonoFormateado} - ${this.pedidosService.formatearPrecio(pedido.total)} - ${tiempoTranscurrido}`,
+      descripcion: `${this.pedidosService.formatearTelefono(pedido.telefono_cliente)} - ${this.pedidosService.formatearPrecio(pedido.total)} - ${this.calcularTiempoTranscurrido(new Date(pedido.fecha_creacion))}`,
       estado: estados[pedido.estado],
       icono: iconos[pedido.estado],
       color: colores[pedido.estado],
@@ -331,12 +287,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   calcularTiempoTranscurrido(fecha: Date): string {
-    const ahora = new Date();
-    const diferencia = ahora.getTime() - fecha.getTime();
+    const diferencia = new Date().getTime() - fecha.getTime();
     const minutos = Math.floor(diferencia / 60000);
     const horas = Math.floor(minutos / 60);
     const dias = Math.floor(horas / 24);
-
     if (dias > 0) return `Hace ${dias} día${dias > 1 ? 's' : ''}`;
     if (horas > 0) return `Hace ${horas} hora${horas > 1 ? 's' : ''}`;
     if (minutos > 0) return `Hace ${minutos} min`;
@@ -345,26 +299,23 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async loadUserData(): Promise<void> {
     try {
-      this.usuario = {
-        id: '1',
-        nombre: 'Juan Pérez',
-        email: 'juan@example.com',
-        rol: 'Administrador'
-      };
-    } catch (error) {
-    }
+      const usuarioJWT = this.authService.getUsuario();
+      if (usuarioJWT) {
+        this.usuario = {
+          id: String(usuarioJWT.id),
+          nombre: usuarioJWT.nombre,
+          email: usuarioJWT.correo,
+          rol: usuarioJWT.rol || 'Administrador'
+        };
+      }
+    } catch (error) {}
   }
 
   async verificarEstadoWhatsApp(): Promise<void> {
     try {
-      const response = await fetch(
-        `${this.API_URL}/whatsapp/public/estado/${this.empresaId}/empresa_${this.empresaId}`
-      );
+      const response = await fetch(`${this.API_URL}/whatsapp/public/estado/${this.empresaId}/empresa_${this.empresaId}`);
       const data = await response.json();
-
-      if (data.success) {
-        this.whatsappConnected = data.conectado;
-      }
+      if (data.success) this.whatsappConnected = data.conectado;
     } catch (error) {
       this.whatsappConnected = false;
     }
@@ -372,21 +323,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private initPedidosChart(): void {
     const canvas = document.getElementById('pedidosChart') as HTMLCanvasElement;
-    if (!canvas) {
-      setTimeout(() => this.initPedidosChart(), 200);
-      return;
-    }
-
+    if (!canvas) { setTimeout(() => this.initPedidosChart(), 200); return; }
     const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    if (typeof Chart === 'undefined') {
-      return;
-    }
-
-    if (this.pedidosChart) {
-      this.pedidosChart.destroy();
-    }
+    if (!ctx || typeof Chart === 'undefined') return;
+    if (this.pedidosChart) { this.pedidosChart.destroy(); }
 
     const datos = this.getDatosActuales();
 
@@ -414,11 +354,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            display: false
-          },
+          legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            backgroundColor: 'rgba(0,0,0,0.8)',
             padding: 12,
             titleColor: '#fff',
             bodyColor: '#fff',
@@ -426,51 +364,23 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
             borderWidth: 1,
             displayColors: false,
             callbacks: {
-              title: function(context: any) {
-                return context[0].label;
-              },
-              label: function(context: any) {
-                return `${context.parsed.y} pedidos`;
-              }
+              title: (context: any) => context[0].label,
+              label: (context: any) => `${context.parsed.y} pedidos`
             }
           }
         },
         scales: {
           y: {
             beginAtZero: true,
-            grid: {
-              color: 'rgba(0, 0, 0, 0.05)',
-              drawBorder: false
-            },
-            ticks: {
-              color: '#6b7280',
-              font: {
-                size: 12,
-                weight: '500'
-              },
-              padding: 10,
-              stepSize: 1
-            }
+            grid: { color: 'rgba(0,0,0,0.05)', drawBorder: false },
+            ticks: { color: '#6b7280', font: { size: 12, weight: '500' }, padding: 10, stepSize: 1 }
           },
           x: {
-            grid: {
-              display: false,
-              drawBorder: false
-            },
-            ticks: {
-              color: '#6b7280',
-              font: {
-                size: 12,
-                weight: '500'
-              },
-              padding: 10
-            }
+            grid: { display: false, drawBorder: false },
+            ticks: { color: '#6b7280', font: { size: 12, weight: '500' }, padding: 10 }
           }
         },
-        interaction: {
-          intersect: false,
-          mode: 'index'
-        }
+        interaction: { intersect: false, mode: 'index' }
       }
     });
   }
@@ -482,9 +392,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private updatePedidosChart(): void {
     if (!this.pedidosChart) return;
-
     const datos = this.getDatosActuales();
-
     this.pedidosChart.data.labels = datos.labels;
     this.pedidosChart.data.datasets[0].data = datos.data;
     this.pedidosChart.update('active');
@@ -492,30 +400,19 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   private getDatosActuales(): { labels: string[], data: number[] } {
     switch (this.vistaActual) {
-      case 'dia':
-        return this.datosPorDia;
-      case 'semana':
-        return this.datosPorSemana;
-      case 'mes':
-        return this.datosPorMes;
-      default:
-        return this.datosPorDia;
+      case 'dia': return this.datosPorDia;
+      case 'semana': return this.datosPorSemana;
+      case 'mes': return this.datosPorMes;
+      default: return this.datosPorDia;
     }
   }
 
-  toggleSidebar(): void {
-    this.sidebarOpen = !this.sidebarOpen;
-  }
+  toggleSidebar(): void { this.sidebarOpen = !this.sidebarOpen; }
 
   handleNavigation(route: string): void {
     this.currentView = route;
     window.scrollTo({ top: 0, behavior: 'smooth' });
-
-    if (route === 'dashboard') {
-      setTimeout(() => {
-        this.initPedidosChart();
-      }, 100);
-    }
+    if (route === 'dashboard') setTimeout(() => this.initPedidosChart(), 100);
   }
 
   handleLogout(): void {
@@ -530,14 +427,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getViewTitle(): string {
     const titles: { [key: string]: string } = {
-      'dashboard': 'Inicio',
-      'mensajes': 'Mensajes',
-      'catalogo': 'Catálogo',
-      'pedidos': 'Pedidos',
-      'reservas': 'Reservas',
-      'chatbot': 'Configurar Chatbot',
-      'whatsapp': 'Estado WhatsApp',
-      'configuracion': 'Configuración'
+      'dashboard': 'Inicio', 'mensajes': 'Mensajes', 'catalogo': 'Catálogo',
+      'pedidos': 'Pedidos', 'reservas': 'Reservas', 'chatbot': 'Configurar Chatbot',
+      'whatsapp': 'Estado WhatsApp', 'configuracion': 'Configuración'
     };
     return titles[this.currentView] || 'Dashboard';
   }
@@ -558,7 +450,6 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   async toggleModulo(modulo: 'pedidos' | 'reservas'): Promise<void> {
     if (!this.empresa) return;
-
     try {
       this.empresa.modulos[modulo] = !this.empresa.modulos[modulo];
     } catch (error) {
@@ -568,12 +459,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
 
   getActivityColorClass(color: string): string {
     const colors: { [key: string]: string } = {
-      'green': 'bg-green-100 text-green-600',
-      'blue': 'bg-blue-100 text-blue-600',
-      'purple': 'bg-purple-100 text-purple-600',
-      'orange': 'bg-orange-100 text-orange-600',
-      'red': 'bg-red-100 text-red-600',
-      'yellow': 'bg-yellow-100 text-yellow-600'
+      'green': 'bg-green-100 text-green-600', 'blue': 'bg-blue-100 text-blue-600',
+      'purple': 'bg-purple-100 text-purple-600', 'orange': 'bg-orange-100 text-orange-600',
+      'red': 'bg-red-100 text-red-600', 'yellow': 'bg-yellow-100 text-yellow-600'
     };
     return colors[color] || 'bg-gray-100 text-gray-600';
   }

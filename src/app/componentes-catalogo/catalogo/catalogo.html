@@ -14,50 +14,25 @@
 <div *ngIf="itemsVisibles.length > 0" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
   <div class="overflow-x-auto">
     <table class="w-full">
-      <!-- Header -->
       <thead class="bg-gray-50 border-b border-gray-200">
         <tr>
-          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Imagen
-          </th>
-          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Nombre
-          </th>
-          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Tipo
-          </th>
-          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Categoría
-          </th>
-          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Precio
-          </th>
-          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider hidden md:table-cell">
-            Stock/Duración
-          </th>
-          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider hidden lg:table-cell">
-            Estado
-          </th>
-          <th class="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">
-            Acciones
-          </th>
+          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Imagen</th>
+          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Nombre</th>
+          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Categoría</th>
+          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Precio</th>
+          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider hidden md:table-cell">Stock</th>
+          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider hidden lg:table-cell">Estado</th>
+          <th class="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Acciones</th>
         </tr>
       </thead>
 
-      <!-- Body -->
       <tbody class="divide-y divide-gray-200">
-        <tr *ngFor="let item of itemsVisibles"
-            class="hover:bg-gray-50 transition">
+        <tr *ngFor="let item of itemsVisibles" class="hover:bg-gray-50 transition">
 
           <!-- Imagen -->
           <td class="px-4 py-3">
             <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
-              <img
-                *ngIf="item.imagen_url"
-                [src]="item.imagen_url"
-                [alt]="item.nombre_item"
-                class="w-full h-full object-cover"
-              >
+              <img *ngIf="item.imagen_url" [src]="item.imagen_url" [alt]="item.nombre_item" class="w-full h-full object-cover">
               <i *ngIf="!item.imagen_url" class="fas fa-image text-gray-400 text-2xl"></i>
             </div>
           </td>
@@ -66,28 +41,17 @@
           <td class="px-4 py-3">
             <div class="max-w-xs">
               <p class="font-bold text-gray-900 text-sm mb-1">{{ item.nombre_item }}</p>
-              <p class="text-xs text-gray-600 line-clamp-2">
-                {{ item.descripcion || 'Sin descripción' }}
-              </p>
+              <p class="text-xs text-gray-600 line-clamp-2">{{ item.descripcion || 'Sin descripción' }}</p>
             </div>
-          </td>
-
-          <!-- Tipo -->
-          <td class="px-4 py-3">
-            <span [class]="'inline-flex items-center px-3 py-1 rounded-full text-xs font-bold ' +
-                          (item.tipo_item === 'producto'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-purple-100 text-purple-800')">
-              <i [class]="'fas mr-1 ' + (item.tipo_item === 'producto' ? 'fa-box' : 'fa-tools')"></i>
-              {{ item.tipo_item === 'producto' ? 'Producto' : 'Servicio' }}
-            </span>
           </td>
 
           <!-- Categoría -->
           <td class="px-4 py-3">
-            <span class="text-sm text-gray-700">
-              {{ item.categoria || '-' }}
+            <span *ngIf="item.categoria" class="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
+              <i class="fas fa-tag mr-1 text-xs"></i>
+              {{ item.categoria.nombre }}
             </span>
+            <span *ngIf="!item.categoria" class="text-sm text-gray-400">—</span>
           </td>
 
           <!-- Precio -->
@@ -100,33 +64,20 @@
             </span>
           </td>
 
-          <!-- Stock/Duración -->
+          <!-- Stock -->
           <td class="px-4 py-3 hidden md:table-cell">
-            <!-- Stock para productos -->
-            <div *ngIf="esProducto(item)" class="flex items-center space-x-1">
+            <div class="flex items-center space-x-1">
               <i class="fas fa-box text-gray-400 text-xs"></i>
               <span class="text-sm text-gray-700">
-                {{ item.stock !== null && item.stock !== undefined ? item.stock : '-' }}
+                {{ item.stock !== null && item.stock !== undefined ? item.stock : '—' }}
               </span>
             </div>
-
-            <!-- Duración para servicios -->
-            <div *ngIf="esServicio(item) && item.duracion_minutos" class="flex items-center space-x-1">
-              <i class="fas fa-clock text-gray-400 text-xs"></i>
-              <span class="text-sm text-gray-700">
-                {{ formatearDuracion(item.duracion_minutos) }}
-              </span>
-            </div>
-
-            <span *ngIf="esServicio(item) && !item.duracion_minutos" class="text-sm text-gray-500">-</span>
           </td>
 
           <!-- Estado -->
           <td class="px-4 py-3 hidden lg:table-cell">
             <span [class]="'inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold ' +
-                          (item.disponible
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800')">
+                          (item.disponible ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800')">
               <span [class]="'w-2 h-2 rounded-full mr-1 ' + (item.disponible ? 'bg-green-500' : 'bg-red-500')"></span>
               {{ item.disponible ? 'Disponible' : 'No disponible' }}
             </span>
@@ -135,16 +86,10 @@
           <!-- Acciones -->
           <td class="px-4 py-3 text-right">
             <div class="flex items-center justify-end space-x-2">
-              <button
-                (click)="editarItem(item)"
-                class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
-                title="Editar">
+              <button (click)="editarItem(item)" class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" title="Editar">
                 <i class="fas fa-edit text-sm"></i>
               </button>
-              <button
-                (click)="eliminarItem(item)"
-                class="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
-                title="Eliminar">
+              <button (click)="eliminarItem(item)" class="p-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition" title="Eliminar">
                 <i class="fas fa-trash text-sm"></i>
               </button>
             </div>
@@ -157,7 +102,6 @@
 
 <!-- Paginación -->
 <div *ngIf="itemsFiltrados.length > 0 && totalPaginas > 1" class="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-  <!-- Botón Anterior -->
   <button
     (click)="cambiarPagina(paginaActual - 1)"
     [disabled]="paginaActual === 1"
@@ -167,7 +111,6 @@
     <span class="hidden sm:inline">Anterior</span>
   </button>
 
-  <!-- Números de página -->
   <div class="flex items-center space-x-1 sm:space-x-2 overflow-x-auto max-w-full px-2">
     <button
       *ngFor="let pagina of paginasVisibles"
@@ -181,7 +124,6 @@
     </button>
   </div>
 
-  <!-- Botón Siguiente -->
   <button
     (click)="cambiarPagina(paginaActual + 1)"
     [disabled]="paginaActual === totalPaginas"
@@ -198,15 +140,15 @@
     <i class="fas fa-box-open text-gray-400 text-4xl sm:text-5xl"></i>
   </div>
   <h3 class="text-lg sm:text-xl font-black text-gray-900 mb-2">
-    {{ terminoBusqueda ? 'No se encontraron resultados' : 'No hay items en el catálogo' }}
+    {{ terminoBusqueda ? 'No se encontraron resultados' : 'No hay productos en el catálogo' }}
   </h3>
   <p class="text-sm sm:text-base text-gray-600 mb-6">
-    {{ terminoBusqueda ? 'Intenta con otros términos de búsqueda' : 'Comienza agregando tu primer producto o servicio' }}
+    {{ terminoBusqueda ? 'Intenta con otros términos de búsqueda' : 'Comienza agregando tu primer producto' }}
   </p>
   <button
-    (click)="terminoBusqueda ? limpiarBusqueda() : mostrarModalTipo()"
+    (click)="terminoBusqueda ? limpiarBusqueda() : mostrarModalAgregar()"
     class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-2 sm:py-3 px-4 sm:px-6 rounded-lg hover:shadow-lg transition inline-flex items-center space-x-2 text-sm sm:text-base">
     <i [class]="'fas ' + (terminoBusqueda ? 'fa-redo' : 'fa-plus')"></i>
-    <span>{{ terminoBusqueda ? 'Limpiar Búsqueda' : 'Agregar Primer Item' }}</span>
+    <span>{{ terminoBusqueda ? 'Limpiar Búsqueda' : 'Agregar Producto' }}</span>
   </button>
 </div>

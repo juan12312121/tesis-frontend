@@ -1,4 +1,4 @@
-<!-- catalogos-universal-final.html -->
+<!-- catalogos-universal.html -->
 
 <!-- Loading State -->
 <div *ngIf="cargando" class="flex items-center justify-center h-screen bg-gray-50">
@@ -11,28 +11,19 @@
 <!-- Main Layout with Sidebar -->
 <div *ngIf="!cargando" class="flex h-screen overflow-hidden bg-gray-50">
 
-  <!-- Sidebar Component -->
-  <app-sidebar
-    [sidebarOpen]="sidebarOpen"
-    [empresa]="empresa"
-    [usuario]="usuario"
-    [currentRoute]="currentRoute"
-    [unreadMessages]="0"
-    (navigate)="handleNavigation($event)"
-    (logout)="handleLogout()">
+  <app-sidebar [sidebarOpen]="sidebarOpen" [empresa]="empresa" [usuario]="usuario" [currentRoute]="currentRoute"
+    [unreadMessages]="0" (navigate)="handleNavigation($event)" (logout)="handleLogout()">
   </app-sidebar>
 
-  <!-- Main Content Area -->
   <div class="flex-1 flex flex-col overflow-hidden">
 
-    <!-- Header Component with Filters and Search (AGREGADO productosHabilitados y serviciosHabilitados) -->
     <app-header-catalogo
       [terminoBusqueda]="terminoBusqueda"
       [filtroTipo]="filtroTipo"
       [filtroCategoria]="filtroCategoria"
       [filtroDisponible]="filtroDisponible"
       [ordenamiento]="ordenamiento"
-      [categoriasDisponibles]="categoriasDisponibles"
+      [categoriasDisponibles]="categoriasEnUso"
       [sidebarOpen]="sidebarOpen"
       [empresaId]="empresaId"
       [productosHabilitados]="productosHabilitados"
@@ -45,14 +36,12 @@
       (cambiarFiltroCategoriaEvent)="cambiarFiltroCategoria($event)"
       (cambiarFiltroDisponibleEvent)="cambiarFiltroDisponible($event)"
       (cambiarOrdenamientoEvent)="cargarCatalogo()"
-      (terminoBusquedaChange)="terminoBusqueda = $event">
+      (terminoBusquedaChange)="terminoBusqueda = $event"
+      (gestionarCategoriasEvent)="abrirModalCategorias()">
     </app-header-catalogo>
 
-    <!-- Content Area with Scroll -->
     <main class="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6">
-      <!-- Mensaje de notificación -->
-      <div *ngIf="mensaje.mostrar"
-           [class]="'mb-6 p-4 rounded-lg border flex items-center justify-between ' +
+      <div *ngIf="mensaje.mostrar" [class]="'mb-6 p-4 rounded-lg border flex items-center justify-between ' +
                     (mensaje.tipo === 'success' ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200')">
         <div class="flex items-center space-x-3">
           <i [class]="'fas ' + (mensaje.tipo === 'success' ? 'fa-check-circle text-green-600' : 'fa-exclamation-circle text-red-600')"></i>
@@ -65,7 +54,6 @@
         </button>
       </div>
 
-      <!-- Grid Component with Products -->
       <app-grid-catalogo
         [itemsPaginados]="itemsPaginados"
         [itemsFiltrados]="itemsFiltrados"
@@ -85,7 +73,7 @@
   </div>
 </div>
 
-<!-- Modal de Selección de Tipo Component -->
+<!-- Modal Selección Tipo -->
 <app-modal-seleccion-tipo
   [mostrarModal]="mostrarModalSeleccionTipo"
   [productosHabilitados]="productosHabilitados"
@@ -94,12 +82,12 @@
   (seleccionarTipoEvent)="seleccionarTipo($event)">
 </app-modal-seleccion-tipo>
 
-<!-- Modal de Creación/Edición Component -->
+<!-- Modal Agregar/Editar -->
 <app-modal-agregar
   [mostrarModal]="mostrarModal"
   [modoEdicion]="modoEdicion"
   [itemActual]="itemActual"
-  [categoriasDisponibles]="categoriasDisponibles"
+  [categoriasDisponibles]="categoriasEnUso"
   [guardando]="guardando"
   [imagenPreview]="imagenPreview"
   [productosHabilitados]="productosHabilitados"
@@ -112,10 +100,12 @@
   (abrirSelectorArchivoEvent)="abrirSelectorArchivo()">
 </app-modal-agregar>
 
-<!-- Input oculto para seleccionar archivos -->
-<input
-  type="file"
-  #fileInput
-  accept="image/*"
-  (change)="onFileSelected($event)"
-  class="hidden">
+<!-- ✅ Modal Categorías correctamente conectado -->
+<app-modal-categorias
+  [mostrarModal]="mostrarModalCategorias"
+  [categorias]="categoriasEnUso"
+  (cerrarModalEvent)="cerrarModalCategorias()"
+  (categoriasActualizadasEvent)="cargarCategorias()">
+</app-modal-categorias>
+
+<input type="file" #fileInput accept="image/*" (change)="onFileSelected($event)" class="hidden">
