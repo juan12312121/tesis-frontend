@@ -1,11 +1,11 @@
 <!-- Card de Estado WhatsApp -->
-<div class="bg-white rounded-xl shadow-lg border-2 transition-all duration-300"
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border-2 transition-all duration-300"
      [class.border-green-500]="estado.conectado"
      [class.border-yellow-500]="!estado.conectado && estado.qr"
      [class.border-red-500]="!estado.conectado && !estado.qr">
 
   <!-- Header -->
-  <div class="p-6 border-b border-gray-200">
+  <div class="p-6 border-b border-gray-200 dark:border-slate-700">
     <div class="flex items-center justify-between">
       <div class="flex items-center space-x-3">
         <div class="w-12 h-12 rounded-full flex items-center justify-center transition-all"
@@ -18,8 +18,8 @@
              [class.text-red-600]="!estado.conectado && !estado.qr"></i>
         </div>
         <div>
-          <h3 class="text-lg font-black text-gray-900">Estado WhatsApp</h3>
-          <p class="text-sm text-gray-500">{{ getEstadoTexto() }}</p>
+          <h3 class="text-lg font-black text-gray-900 dark:text-slate-50">Estado WhatsApp</h3>
+          <p class="text-sm text-gray-500 dark:text-slate-400">{{ getEstadoTexto() }}</p>
         </div>
       </div>
 
@@ -76,27 +76,38 @@
 
     <!-- Estado Esperando QR -->
     <div *ngIf="!estado.conectado && estado.qr" class="space-y-4">
-      <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+      <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
         <div class="flex items-start space-x-3">
-          <i class="fas fa-qrcode text-yellow-600 text-xl mt-1"></i>
+          <i class="fas fa-qrcode text-yellow-600 dark:text-yellow-400 text-xl mt-1"></i>
           <div class="flex-1">
-            <p class="font-bold text-yellow-900">Escanea el código QR</p>
-            <p class="text-sm text-yellow-700 mt-1">
+            <p class="font-bold text-yellow-900 dark:text-yellow-100">Escanea el código QR</p>
+            <p class="text-sm text-yellow-700 dark:text-yellow-300 mt-1">
               Abre WhatsApp en tu teléfono y escanea este código para conectar.
             </p>
           </div>
         </div>
       </div>
 
-      <!-- QR Code -->
-      <div class="bg-white border-2 border-gray-200 rounded-lg p-6 flex flex-col items-center">
+      <!-- QR Code (Solo Computadora) -->
+      <div *ngIf="!isMobile" class="bg-white dark:bg-slate-700 border-2 border-gray-200 dark:border-slate-600 rounded-lg p-6 flex flex-col items-center">
         <img [src]="estado.qr" alt="QR Code" class="w-64 h-64 mb-4">
-        <p class="text-sm text-gray-600 text-center">
+        <p class="text-sm text-gray-600 dark:text-slate-300 text-center">
           El código expira automáticamente. Si expira, haz clic en "Regenerar QR"
         </p>
       </div>
 
-      <div class="flex space-x-3">
+      <!-- Mensaje para Móvil -->
+      <div *ngIf="isMobile" class="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-lg p-6 flex flex-col items-center text-center">
+        <div class="w-16 h-16 bg-blue-100 dark:bg-blue-800 rounded-full flex items-center justify-center mb-4 text-blue-600 dark:text-blue-400">
+          <i class="fas fa-laptop text-2xl"></i>
+        </div>
+        <h4 class="font-black text-blue-900 dark:text-blue-100 mb-2">Usa una Computadora</h4>
+        <p class="text-sm text-blue-700 dark:text-blue-300">
+          Para vincular tu WhatsApp, por favor accede a este panel desde una laptop o PC para que puedas escanear el código con tu celular.
+        </p>
+      </div>
+
+      <div class="flex space-x-3" *ngIf="!isMobile">
         <button (click)="regenerarQR()"
                 [disabled]="regenerando"
                 class="flex-1 bg-yellow-600 text-white font-bold py-3 px-4 rounded-lg hover:bg-yellow-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2">
@@ -114,29 +125,36 @@
 
     <!-- Estado Desconectado -->
     <div *ngIf="!estado.conectado && !estado.qr" class="space-y-4">
-      <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+      <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
         <div class="flex items-start space-x-3">
-          <i class="fas fa-exclamation-triangle text-red-600 text-xl mt-1"></i>
+          <i class="fas fa-exclamation-triangle text-red-600 dark:text-red-400 text-xl mt-1"></i>
           <div class="flex-1">
-            <p class="font-bold text-red-900">WhatsApp Desconectado</p>
-            <p class="text-sm text-red-700 mt-1">
-              {{ estado.mensaje || 'La conexión con WhatsApp se ha perdido. Haz clic en "Conectar" para restablecer la conexión.' }}
+            <p class="font-bold text-red-900 dark:text-red-100">WhatsApp Desconectado</p>
+            <p class="text-sm text-red-700 dark:text-red-300 mt-1">
+              {{ estado.mensaje || 'La conexión con WhatsApp se ha perdido.' }}
             </p>
           </div>
         </div>
       </div>
 
-      <button (click)="iniciarConexion()"
+      <button *ngIf="!isMobile" (click)="iniciarConexion()"
               [disabled]="conectando"
               class="w-full bg-green-600 text-white font-bold py-4 px-6 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2 text-lg">
         <i class="fas" [class.fa-plug]="!conectando" [class.fa-spinner]="conectando" [class.animate-spin]="conectando"></i>
         <span>{{ conectando ? 'Conectando...' : 'Conectar WhatsApp' }}</span>
       </button>
+
+      <div *ngIf="isMobile" class="p-4 bg-gray-100 dark:bg-slate-700 rounded-lg text-center">
+        <p class="text-sm text-gray-600 dark:text-slate-300 font-semibold">
+          <i class="fas fa-info-circle mr-2"></i>
+          Para vincular una nueva sesión, por favor usa una computadora.
+        </p>
+      </div>
     </div>
 
     <!-- Última Verificación -->
-    <div *ngIf="estado.ultimaVerificacion" class="mt-4 pt-4 border-t border-gray-200">
-      <p class="text-xs text-gray-500 text-center">
+    <div *ngIf="estado.ultimaVerificacion" class="mt-4 pt-4 border-t border-gray-200 dark:border-slate-700">
+      <p class="text-xs text-gray-500 dark:text-slate-400 text-center">
         <i class="fas fa-clock mr-1"></i>
         Última verificación: {{ estado.ultimaVerificacion | date:'short' }}
       </p>
@@ -154,11 +172,11 @@
   </div>
 
   <!-- Footer con Toggle Auto-verificación -->
-  <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 rounded-b-xl">
+  <div class="px-6 py-4 bg-gray-50 dark:bg-slate-800/50 border-t border-gray-200 dark:border-slate-700 rounded-b-xl transition-colors">
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-sm font-bold text-gray-900">Verificación Automática</p>
-        <p class="text-xs text-gray-600">Monitorea el estado continuamente</p>
+        <p class="text-sm font-bold text-gray-900 dark:text-slate-50">Verificación Automática</p>
+        <p class="text-xs text-gray-600 dark:text-slate-400">Monitorea el estado continuamente</p>
       </div>
       <button (click)="toggleAutoVerificacion()"
               class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"

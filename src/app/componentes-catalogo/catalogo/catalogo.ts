@@ -25,10 +25,11 @@ export class catalogo implements OnChanges {
   @Output() cambiarPaginaEvent = new EventEmitter<number>();
   @Output() limpiarBusquedaEvent = new EventEmitter<void>();
   @Output() mostrarModalTipoEvent = new EventEmitter<void>();
+  @Output() configurarHorariosEvent = new EventEmitter<CatalogoItem>();
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['itemsPaginados']) {
-      console.log('📊 GRID - Items recibidos:', this.itemsPaginados.length);
+      console.log(' GRID - Items recibidos:', this.itemsPaginados.length);
     }
   }
 
@@ -51,6 +52,10 @@ export class catalogo implements OnChanges {
 
   eliminarItem(item: CatalogoItem) {
     this.eliminarItemEvent.emit(item);
+  }
+
+  configurarHorarios(item: CatalogoItem) {
+    this.configurarHorariosEvent.emit(item);
   }
 
   cambiarPagina(pagina: number) {

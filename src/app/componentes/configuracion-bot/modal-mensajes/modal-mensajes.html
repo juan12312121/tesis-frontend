@@ -4,11 +4,11 @@
      (click)="onBackdropClick()">
 
   <!-- Modal Container -->
-  <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+  <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto transition-colors"
        (click)="onModalClick($event)">
 
     <!-- Modal Header -->
-    <div class="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between z-10">
+    <div class="sticky top-0 bg-gradient-to-r from-blue-600 to-blue-700 dark:from-blue-700 dark:to-blue-800 text-white px-6 py-4 rounded-t-2xl flex items-center justify-between z-10 transition-colors">
       <div class="flex items-center space-x-3">
         <i class="fas fa-comment-dots text-2xl"></i>
         <h3 class="text-xl font-bold">{{ modalTitle }}</h3>
@@ -24,8 +24,8 @@
 
       <!-- Tipo de Respuesta -->
       <div class="space-y-2">
-        <label class="block text-sm font-bold text-gray-700">
-          <i class="fas fa-tag mr-2 text-blue-600"></i>
+        <label class="block text-sm font-bold text-gray-700 dark:text-slate-300">
+          <i class="fas fa-tag mr-2 text-blue-600 dark:text-blue-400"></i>
           Tipo de Respuesta
         </label>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
@@ -33,7 +33,7 @@
                   (click)="formData.tipo_respuesta = 'texto'"
                   [ngClass]="formData.tipo_respuesta === 'texto'
                     ? 'bg-blue-600 text-white border-blue-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400'"
+                    : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-600 hover:border-blue-400'"
                   class="flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all">
             <i class="fas fa-comment text-2xl mb-2"></i>
             <span class="text-xs font-semibold">Texto</span>
@@ -43,7 +43,7 @@
                   (click)="formData.tipo_respuesta = 'imagen'"
                   [ngClass]="formData.tipo_respuesta === 'imagen'
                     ? 'bg-green-600 text-white border-green-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-green-400'"
+                    : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-600 hover:border-green-400'"
                   class="flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all">
             <i class="fas fa-image text-2xl mb-2"></i>
             <span class="text-xs font-semibold">Imagen</span>
@@ -53,7 +53,7 @@
                   (click)="formData.tipo_respuesta = 'documento'"
                   [ngClass]="formData.tipo_respuesta === 'documento'
                     ? 'bg-red-600 text-white border-red-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-red-400'"
+                    : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-600 hover:border-red-400'"
                   class="flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all">
             <i class="fas fa-file-pdf text-2xl mb-2"></i>
             <span class="text-xs font-semibold">PDF</span>
@@ -63,7 +63,7 @@
                   (click)="formData.tipo_respuesta = 'enlace'"
                   [ngClass]="formData.tipo_respuesta === 'enlace'
                     ? 'bg-purple-600 text-white border-purple-600'
-                    : 'bg-white text-gray-700 border-gray-300 hover:border-purple-400'"
+                    : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-300 border-gray-300 dark:border-slate-600 hover:border-purple-400'"
                   class="flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all">
             <i class="fas fa-link text-2xl mb-2"></i>
             <span class="text-xs font-semibold">Enlace</span>
@@ -73,8 +73,8 @@
 
       <!-- Texto Disparador -->
       <div class="space-y-2">
-        <label class="block text-sm font-bold text-gray-700">
-          <i class="fas fa-bullseye mr-2 text-yellow-600"></i>
+        <label class="block text-sm font-bold text-gray-700 dark:text-slate-300">
+          <i class="fas fa-bullseye mr-2 text-yellow-600 dark:text-yellow-400"></i>
           Texto Disparador
           <span class="text-red-500">*</span>
         </label>
@@ -84,8 +84,8 @@
                placeholder="Ej: horario, precio, ubicación"
                [ngClass]="errors.texto_disparador
                  ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-                 : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'"
-               class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 transition">
+                 : 'border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-200'"
+               class="w-full px-4 py-3 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 border-2 rounded-lg focus:outline-none focus:ring-2 transition">
         <div class="flex items-center justify-between">
           <p *ngIf="errors.texto_disparador" class="text-red-600 text-sm font-medium">
             <i class="fas fa-exclamation-circle mr-1"></i>
@@ -104,8 +104,8 @@
 
       <!-- Respuesta -->
       <div class="space-y-2">
-        <label class="block text-sm font-bold text-gray-700">
-          <i class="fas fa-comment-alt mr-2 text-green-600"></i>
+        <label class="block text-sm font-bold text-gray-700 dark:text-slate-300">
+          <i class="fas fa-comment-alt mr-2 text-green-600 dark:text-green-400"></i>
           Respuesta
           <span class="text-red-500">*</span>
         </label>
@@ -115,8 +115,8 @@
                   placeholder="Escribe la respuesta que se enviará automáticamente..."
                   [ngClass]="errors.respuesta
                     ? 'border-red-300 focus:border-red-500 focus:ring-red-200'
-                    : 'border-gray-300 focus:border-blue-500 focus:ring-blue-200'"
-                  class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none focus:ring-2 transition resize-none"></textarea>
+                    : 'border-gray-300 dark:border-slate-600 focus:border-blue-500 focus:ring-blue-200'"
+                  class="w-full px-4 py-3 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-100 border-2 rounded-lg focus:outline-none focus:ring-2 transition resize-none"></textarea>
         <div class="flex items-center justify-between">
           <p *ngIf="errors.respuesta" class="text-red-600 text-sm font-medium">
             <i class="fas fa-exclamation-circle mr-1"></i>
@@ -130,21 +130,21 @@
       </div>
 
       <!-- Ejemplo de Uso -->
-      <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4">
-        <p class="text-blue-900 font-bold text-sm mb-2">
+      <div class="bg-blue-50 dark:bg-blue-900/10 border-2 border-blue-200 dark:border-blue-900/50 rounded-lg p-4 transition-colors">
+        <p class="text-blue-900 dark:text-blue-400 font-bold text-sm mb-2">
           <i class="fas fa-lightbulb mr-2"></i>
           Vista Previa
         </p>
-        <div class="bg-white rounded-lg p-3 space-y-2">
-          <p class="text-xs text-gray-500">
+        <div class="bg-white dark:bg-slate-900/40 rounded-lg p-3 space-y-2">
+          <p class="text-xs text-gray-500 dark:text-slate-400">
             <strong>Usuario:</strong>
-            <span class="bg-yellow-100 px-2 py-1 rounded">
+            <span class="bg-yellow-100 dark:bg-yellow-900/30 dark:text-yellow-100 px-2 py-1 rounded">
               {{ formData.texto_disparador || '(texto disparador)' }}
             </span>
           </p>
-          <p class="text-xs text-gray-700">
+          <p class="text-xs text-gray-700 dark:text-slate-300">
             <strong>Bot:</strong>
-            <span class="bg-green-100 px-2 py-1 rounded">
+            <span class="bg-green-100 dark:bg-green-900/30 dark:text-green-100 px-2 py-1 rounded">
               {{ formData.respuesta || '(respuesta)' }}
             </span>
           </p>
@@ -154,10 +154,10 @@
     </div>
 
     <!-- Modal Footer -->
-    <div class="sticky bottom-0 bg-gray-50 px-6 py-4 rounded-b-2xl border-t border-gray-200 flex justify-end space-x-3">
+    <div class="sticky bottom-0 bg-gray-50 dark:bg-slate-900 px-6 py-4 rounded-b-2xl border-t border-gray-200 dark:border-slate-700 flex justify-end space-x-3 transition-colors">
       <button (click)="onClose()"
               [disabled]="isSaving"
-              class="px-6 py-3 bg-white text-gray-700 border-2 border-gray-300 rounded-lg font-bold hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
+              class="px-6 py-3 bg-white dark:bg-slate-800 text-gray-700 dark:text-slate-300 border-2 border-gray-300 dark:border-slate-600 rounded-lg font-bold hover:bg-gray-100 dark:hover:bg-slate-700 transition disabled:opacity-50 disabled:cursor-not-allowed">
         <i class="fas fa-times mr-2"></i>
         Cancelar
       </button>

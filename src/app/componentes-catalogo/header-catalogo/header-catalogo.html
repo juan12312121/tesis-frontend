@@ -1,14 +1,14 @@
 <!-- header-catalogo.html -->
 
 <!-- Top Header -->
-<header class="bg-white shadow-sm border-b border-gray-200">
+<header class="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700 transition-colors">
   <div class="flex items-center justify-between px-4 sm:px-6 py-4">
     <div class="flex items-center space-x-4">
-      <button (click)="toggleSidebar()" class="lg:hidden text-gray-600 hover:text-gray-900">
+      <button (click)="toggleSidebar()" class="lg:hidden text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white">
         <i class="fas fa-bars text-xl"></i>
       </button>
-      <h1 class="text-xl sm:text-2xl font-black text-gray-900">
-        <i class="fas fa-box-open mr-2 text-blue-600"></i>
+      <h1 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-slate-50">
+        <i class="fas fa-box-open mr-2 text-blue-600 dark:text-blue-400"></i>
         <span class="hidden sm:inline">Catálogo</span>
       </h1>
     </div>
@@ -18,17 +18,9 @@
       <!-- ✅ Botón Categorías -->
       <button
         (click)="gestionarCategorias()"
-        class="hidden sm:flex items-center space-x-2 px-3 sm:px-4 py-2 bg-indigo-50 text-indigo-700 font-semibold rounded-lg hover:bg-indigo-100 transition border border-indigo-200">
+        class="flex items-center space-x-2 px-3 sm:px-4 py-2 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-700 dark:text-indigo-300 font-semibold rounded-lg hover:bg-indigo-100 dark:hover:bg-indigo-800/60 transition border border-indigo-200 dark:border-indigo-800">
         <i class="fas fa-tags"></i>
         <span class="hidden md:inline">Categorías</span>
-      </button>
-
-      <!-- Botón Configuración -->
-      <button
-        (click)="irAConfiguracion()"
-        class="hidden sm:flex items-center space-x-2 px-3 sm:px-4 py-2 bg-gray-100 text-gray-700 font-semibold rounded-lg hover:bg-gray-200 transition">
-        <i class="fas fa-cog"></i>
-        <span class="hidden md:inline">Configuración</span>
       </button>
 
       <!-- Botón Nuevo Item -->
@@ -50,9 +42,9 @@
         (ngModelChange)="onTerminoBusquedaChange()"
         (keyup.enter)="buscar()"
         placeholder="Buscar por nombre, descripción o etiquetas..."
-        class="w-full pl-10 pr-20 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm sm:text-base"
+        class="w-full pl-10 pr-20 py-3 bg-white dark:bg-slate-700 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 dark:text-slate-100 text-sm sm:text-base transition-colors"
       >
-      <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+      <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-slate-500"></i>
       <div class="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-2">
         <button *ngIf="terminoBusqueda" (click)="limpiarBusqueda()" class="text-gray-400 hover:text-gray-600">
           <i class="fas fa-times"></i>
@@ -69,8 +61,8 @@
     <div class="flex flex-col sm:flex-row gap-3">
 
       <!-- Filtro Tipo -->
-      <div class="flex-1">
-        <label class="block text-xs font-bold text-gray-700 mb-1">Tipo</label>
+      <div class="flex-1" *ngIf="false">
+        <label class="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Tipo</label>
         <div class="flex space-x-2">
           <button *ngIf="mostrarFiltroTodos" (click)="cambiarFiltroTipo('todos')"
             [class]="'flex-1 py-2 px-3 rounded-lg font-semibold text-sm transition ' +
@@ -96,11 +88,11 @@
 
       <!-- ✅ Filtro Categoría — ahora usa cat.id y cat.nombre -->
       <div class="flex-1">
-        <label class="block text-xs font-bold text-gray-700 mb-1">Categoría</label>
+        <label class="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Categoría</label>
         <select
           [(ngModel)]="filtroCategoria"
           (change)="cambiarFiltroCategoria(filtroCategoria)"
-          class="w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+          class="w-full py-2 px-3 bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-50 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
           <option value="todas">Todas</option>
           <option *ngFor="let cat of categoriasDisponibles" [value]="cat.id">{{ cat.nombre }}</option>
         </select>
@@ -108,11 +100,11 @@
 
       <!-- Filtro Disponibilidad -->
       <div class="flex-1">
-        <label class="block text-xs font-bold text-gray-700 mb-1">Disponibilidad</label>
+        <label class="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Disponibilidad</label>
         <select
           [(ngModel)]="filtroDisponible"
           (change)="cambiarFiltroDisponible(filtroDisponible)"
-          class="w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+          class="w-full py-2 px-3 bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-50 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
           <option value="todos">Todos</option>
           <option value="disponible">Disponibles</option>
           <option value="no_disponible">No disponibles</option>
@@ -121,11 +113,11 @@
 
       <!-- Ordenamiento -->
       <div class="flex-1">
-        <label class="block text-xs font-bold text-gray-700 mb-1">Ordenar por</label>
+        <label class="block text-xs font-bold text-gray-700 dark:text-slate-300 mb-1">Ordenar por</label>
         <select
           [(ngModel)]="ordenamiento"
           (change)="cambiarOrdenamiento()"
-          class="w-full py-2 px-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
+          class="w-full py-2 px-3 bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-50 border border-gray-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-blue-500 text-sm">
           <option value="fecha">Más recientes</option>
           <option value="nombre">Nombre A-Z</option>
           <option value="precio">Precio</option>

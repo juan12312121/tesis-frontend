@@ -57,7 +57,7 @@ export class Pedidos implements OnInit {
     private router: Router,
     private authService: Autenticacion,
     private pedidosService: PedidosService
-  ) {}
+  ) { }
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent) {
@@ -75,7 +75,7 @@ export class Pedidos implements OnInit {
     this.empresa = {
       id: this.empresaId,
       nombre: this.usuarioActual?.empresa?.nombre || 'Mi Empresa',
-      tipo: this.usuarioActual?.empresa?.tipo || 'Empresa',
+      tipo: this.usuarioActual?.empresa?.tipo_negocio || 'ambos',
       modulos: this.usuarioActual?.empresa?.modulos || {
         catalogo: true,
         pedidos: true,
@@ -105,12 +105,18 @@ export class Pedidos implements OnInit {
 
   handleNavigation(route: string) {
     this.currentRoute = route;
+    if (window.innerWidth < 1024) this.sidebarOpen = false;
   }
 
   handleLogout() {
     this.authService.logout();
   }
 
+  /**
+   * Obtiene la lista asincrona de pedidos desde el backend.
+   * Aplica el filtro de estado actual si existe uno definido.
+   * Maneja diversos estados de error mostrando mensajes descriptivos.
+   */
   cargarPedidos() {
     this.cargando = true;
 
@@ -157,10 +163,15 @@ export class Pedidos implements OnInit {
           this.estadisticas = response.data;
         }
       },
-      error: () => {}
+      error: () => { }
     });
   }
 
+  /**
+   * Ejecuta el filtro de busqueda local sobre el listado de pedidos cargados.
+   * Revisa coincidencias por nombre, telefono y folio del pedido.
+   * Tambien se encarga de reiniciar la paginacion tras el filtrado.
+   */
   aplicarFiltros() {
     let resultados = [...this.pedidos];
 
@@ -269,6 +280,13 @@ export class Pedidos implements OnInit {
     }
   }
 
+  /**
+   * Modifica el estado de un pedido (ej: de Pendiente a En Proceso) iterando
+   * con el servidor para persistir los cambios. Actualiza localmente
+   * el listado y las estadisticas despues de una operacion exitosa.
+   * @param pedidoId El identificador unico del pedido a modificar.
+   * @param nuevoEstado El estado de seguimiento seleccionado.
+   */
   actualizarEstado(pedidoId: number, nuevoEstado: Pedido['estado']) {
     this.actualizando = true;
     this.mostrarOpcionesEstado = false;

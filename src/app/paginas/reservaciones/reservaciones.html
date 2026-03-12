@@ -1,0 +1,398 @@
+<div *ngIf="cargando" class="flex items-center justify-center h-screen bg-gray-50 dark:bg-slate-900 transition-colors">
+  <div class="text-center">
+    <div class="inline-block animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 dark:border-blue-400 mb-4"></div>
+    <p class="text-gray-600 dark:text-slate-400 font-semibold">Cargando reservaciones...</p>
+  </div>
+</div>
+
+<div *ngIf="!cargando" class="flex h-screen overflow-hidden bg-gray-50 dark:bg-slate-900 transition-colors">
+  <app-sidebar [sidebarOpen]="sidebarOpen" [empresa]="empresa" [usuario]="usuario" [currentRoute]="currentRoute"
+    [unreadMessages]="0" (navigate)="handleNavigation($event)" (logout)="handleLogout()" (toggleSidebarEvent)="toggleSidebar()">
+  </app-sidebar>
+
+  <div class="flex-1 flex flex-col overflow-hidden">
+    <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700 transition-colors">
+      <div class="flex items-center justify-between px-4 sm:px-6 py-4">
+        <div class="flex items-center space-x-4">
+          <button (click)="toggleSidebar()" class="lg:hidden text-gray-600 dark:text-slate-300 hover:text-gray-900 dark:hover:text-white transition">
+            <i class="fas fa-bars text-xl"></i>
+          </button>
+          <div>
+            <h2 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-slate-50 flex items-center space-x-2">
+              <i class="fas fa-calendar-alt text-blue-600 dark:text-blue-400"></i>
+              <span>Citas y Reservaciones</span>
+            </h2>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-slate-400 font-medium hidden sm:block">Administra la agenda de tus clientes</p>
+          </div>
+        </div>
+
+        <!-- Selector de Vista -->
+        <div class="bg-gray-100 dark:bg-slate-700 p-1 rounded-lg flex items-center space-x-1">
+          <button (click)="cambiarVista('lista')"
+            [class]="vistaModo === 'lista' ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'"
+            class="px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center space-x-2">
+            <i class="fas fa-list"></i>
+            <span class="hidden sm:inline">Lista</span>
+          </button>
+          <button (click)="cambiarVista('calendario')"
+            [class]="vistaModo === 'calendario' ? 'bg-white dark:bg-slate-800 text-blue-600 dark:text-blue-400 shadow-sm' : 'text-gray-500 hover:text-gray-700 dark:text-slate-400 dark:hover:text-slate-200'"
+            class="px-4 py-1.5 rounded-md text-sm font-bold transition-all flex items-center space-x-2">
+            <i class="fas fa-calendar"></i>
+            <span class="hidden sm:inline">Calendario</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto bg-gray-50 dark:bg-slate-900 p-4 sm:p-6 transition-colors">
+      <div *ngIf="mensaje.mostrar" [class]="'mb-6 p-4 rounded-lg border flex items-center justify-between ' +
+                    (mensaje.tipo === 'success' 
+                      ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800' 
+                      : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800')">
+        <div class="flex items-center space-x-3">
+          <i [class]="'fas ' + (mensaje.tipo === 'success' ? 'fa-check-circle text-green-600 dark:text-green-400' : 'fa-exclamation-circle text-red-600 dark:text-red-400')"></i>
+          <span [class]="'font-semibold text-sm ' + (mensaje.tipo === 'success' ? 'text-green-800 dark:text-green-200' : 'text-red-800 dark:text-red-200')">
+            {{ mensaje.texto }}
+          </span>
+        </div>
+        <button (click)="cerrarMensaje()" class="text-gray-500 dark:text-slate-400 hover:text-gray-700 dark:hover:text-slate-200">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <!-- Filtros (Solo en modo lista) -->
+      <div *ngIf="vistaModo === 'lista'" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 sm:p-6 mb-6 transition-colors">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="md:col-span-2">
+            <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">
+              <i class="fas fa-search mr-2"></i>Buscar Cita
+            </label>
+            <div class="relative flex space-x-2">
+              <div class="relative flex-1">
+                <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                <input type="text" [(ngModel)]="terminoBusqueda" (input)="aplicarFiltros()"
+                  placeholder="Buscar por cliente, teléfono o ID..."
+                  class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-50 border-2 border-gray-300 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium">
+              </div>
+              <button *ngIf="terminoBusqueda" (click)="limpiarBusqueda()"
+                class="bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold px-4 py-3 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">
+              <i class="fas fa-list-ol mr-2"></i>Mostrar
+            </label>
+            <select [(ngModel)]="itemsPorPagina" (change)="actualizarPaginacion()"
+              class="w-full px-4 py-3 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-50 border-2 border-gray-300 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium">
+              <option [value]="10">10 reservas</option>
+              <option [value]="25">25 reservas</option>
+              <option [value]="50">50 reservas</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="mt-4">
+          <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">
+            <i class="fas fa-filter mr-2"></i>Filtrar por estado
+          </label>
+          <div class="flex flex-wrap gap-2">
+            <button
+              [class]="'px-4 py-2 rounded-lg font-bold transition text-sm flex items-center space-x-2 ' +
+                       (filtroEstado === 'todos' 
+                         ? 'bg-blue-600 text-white shadow-lg' 
+                         : 'bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-300 dark:hover:bg-slate-600')"
+              (click)="cambiarFiltroEstado('todos')">
+              <i class="fas fa-th"></i>
+              <span>Todas ({{ reservaciones.length }})</span>
+            </button>
+            <button
+              [class]="'px-4 py-2 rounded-lg font-bold transition text-sm flex items-center space-x-2 ' +
+                       (filtroEstado === 'pendiente' 
+                         ? 'bg-yellow-600 text-white shadow-lg' 
+                         : 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-900/50')"
+              (click)="cambiarFiltroEstado('pendiente')">
+              <i class="fas fa-clock"></i>
+              <span>Pendientes</span>
+            </button>
+            <button
+              [class]="'px-4 py-2 rounded-lg font-bold transition text-sm flex items-center space-x-2 ' +
+                       (filtroEstado === 'confirmada' 
+                         ? 'bg-green-600 text-white shadow-lg' 
+                         : 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-400 hover:bg-green-200 dark:hover:bg-green-900/50')"
+              (click)="cambiarFiltroEstado('confirmada')">
+              <i class="fas fa-check-circle"></i>
+              <span>Confirmadas</span>
+            </button>
+            <button
+              [class]="'px-4 py-2 rounded-lg font-bold transition text-sm flex items-center space-x-2 ' +
+                       (filtroEstado === 'cancelada' 
+                         ? 'bg-red-600 text-white shadow-lg' 
+                         : 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-900/50')"
+              (click)="cambiarFiltroEstado('cancelada')">
+              <i class="fas fa-times-circle"></i>
+              <span>Canceladas</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA: TABLA (Modo Lista) -->
+      <div *ngIf="vistaModo === 'lista' && reservacionesFiltradas.length > 0" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden transition-colors">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 flex items-center justify-between transition-colors">
+          <h3 class="text-lg font-black text-gray-900 dark:text-slate-50">
+            <i class="fas fa-list mr-2 text-blue-600 dark:text-blue-400"></i>
+            Listado de Citas
+          </h3>
+          <span class="text-sm font-semibold text-gray-600 dark:text-slate-400">Mostrando {{ rangoItems }}</span>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-100 dark:bg-slate-700 border-b-2 border-gray-300 dark:border-slate-600 transition-colors">
+              <tr>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-slate-300 uppercase">ID</th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-slate-300 uppercase">Cliente</th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-slate-300 uppercase">Servicio</th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-slate-300 uppercase">Fecha y Hora</th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-slate-300 uppercase">Personas</th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-slate-300 uppercase">Estado</th>
+                <th class="px-6 py-4 text-center text-xs font-black text-gray-700 dark:text-slate-300 uppercase">Acciones</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+              <tr *ngFor="let res of reservacionesPaginadas" class="hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-colors">
+                <td class="px-6 py-4 whitespace-nowrap"><span class="font-bold text-gray-900 dark:text-slate-50">#{{ res.id }}</span></td>
+                <td class="px-6 py-4">
+                  <p class="font-bold text-gray-900 dark:text-slate-50">{{ res.nombre_cliente }}</p>
+                  <p class="text-xs text-gray-500 dark:text-slate-400"><i class="fab fa-whatsapp text-green-500 dark:text-green-400 mr-1"></i>{{ formatearTelefono(res.telefono_cliente) }}</p>
+                </td>
+                <td class="px-6 py-4">
+                  <span class="bg-gray-100 dark:bg-slate-600 text-gray-800 dark:text-slate-100 font-bold px-2 py-1 rounded-md text-sm transition-colors">
+                    {{ res.servicio?.nombre || 'General' }}
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <p class="font-semibold text-gray-900 dark:text-slate-50">{{ formatearFechaCorta(res.fecha_reservacion) }}</p>
+                  <p class="text-xs font-bold text-blue-600 dark:text-blue-400"><i class="far fa-clock mr-1"></i>{{ formatearHora(res.fecha_reservacion) }}</p>
+                </td>
+                <td class="px-6 py-4 text-center font-bold text-gray-700 dark:text-slate-300 whitespace-nowrap">
+                  <i class="fas fa-users mr-1"></i>{{ res.numero_personas || 1 }}
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                  <span [class]="'inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-bold border ' + getEstadoColor(res.estado)">
+                    <i [class]="'fas ' + getEstadoIcono(res.estado)"></i>
+                    <span>{{ getEstadoTexto(res.estado) }}</span>
+                  </span>
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap text-center">
+                  <div class="flex items-center justify-center space-x-2">
+                    <button (click)="verDetalle(res)" class="bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800/50 font-bold p-2 rounded-lg transition" title="Ver detalle">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <div *ngIf="res.estado === 'pendiente'" class="relative">
+                      <button (click)="toggleEstadoMenu(res.id)" class="bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-slate-300 hover:bg-gray-200 dark:hover:bg-slate-600 font-bold p-2 rounded-lg transition">
+                        <i class="fas fa-ellipsis-v"></i>
+                      </button>
+                      <div *ngIf="menuEstadoAbierto === res.id" class="absolute right-0 mt-2 w-40 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 z-50">
+                        <div class="py-1">
+                          <button (click)="actualizarEstado(res.id, 'confirmada')" [disabled]="actualizando" class="w-full text-left px-4 py-2 text-sm font-semibold text-green-700 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 flex items-center space-x-2">
+                            <i class="fas fa-check-circle"></i><span>Confirmar</span>
+                          </button>
+                          <button (click)="actualizarEstado(res.id, 'cancelada')" [disabled]="actualizando" class="w-full text-left px-4 py-2 text-sm font-semibold text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center space-x-2">
+                            <i class="fas fa-times-circle"></i><span>Cancelar</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="px-6 py-4 border-t border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 flex justify-between items-center transition-colors">
+          <span class="text-sm font-medium text-gray-600 dark:text-slate-400">Pág. {{ paginaActual }} de {{ totalPaginas }}</span>
+          <div class="space-x-2">
+            <button (click)="cambiarPagina(paginaActual - 1)" [disabled]="paginaActual === 1" class="px-3 py-1 border dark:border-slate-600 dark:text-slate-300 rounded disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-slate-700 transition">Atrás</button>
+            <button (click)="cambiarPagina(paginaActual + 1)" [disabled]="paginaActual === totalPaginas" class="px-3 py-1 border dark:border-slate-600 dark:text-slate-300 rounded disabled:opacity-50 hover:bg-gray-100 dark:hover:bg-slate-700 transition">Sig</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- VISTA: CALENDARIO -->
+      <div *ngIf="vistaModo === 'calendario'" class="space-y-6">
+        <div class="grid lg:grid-cols-3 gap-6">
+          
+          <!-- Calendario Grid -->
+          <div class="lg:col-span-2 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 transition-colors">
+            <div class="flex flex-col sm:flex-row items-center justify-between mb-6 sm:mb-8 space-y-4 sm:space-y-0 text-center sm:text-left">
+              <h3 class="text-lg sm:text-xl font-black text-gray-900 dark:text-slate-50 capitalize">
+                {{ getNombreMes() }}
+              </h3>
+              <div class="flex items-center space-x-2">
+                <button (click)="cambiarMes(-1)" class="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full text-gray-600 dark:text-slate-300">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+                <button (click)="irAHoy()" class="px-3 py-1.5 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg">
+                  Hoy
+                </button>
+                <button (click)="cambiarMes(1)" class="p-1.5 sm:p-2 hover:bg-gray-100 dark:hover:bg-slate-700 rounded-full text-gray-600 dark:text-slate-300">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-7 gap-px bg-gray-200 dark:bg-slate-700 rounded-lg overflow-hidden border border-gray-200 dark:border-slate-700">
+              <!-- Cabecera Días -->
+              <div *ngFor="let dia of nombresDias" class="bg-gray-50 dark:bg-slate-800 py-2 sm:py-3 text-center">
+                <span class="text-[10px] sm:text-xs font-black text-gray-500 dark:text-slate-400 uppercase tracking-wider">{{ dia }}</span>
+              </div>
+
+              <!-- Celdas de Días -->
+              <div *ngFor="let dia of diasCalendario"
+                   (click)="seleccionarDia(dia)"
+                   class="min-h-[70px] sm:min-h-[100px] bg-white dark:bg-slate-800 p-1 sm:p-2 transition-all cursor-pointer group relative"
+                   [ngClass]="{
+                     'opacity-40 bg-gray-50 dark:bg-slate-900/30 cursor-default': !dia.actual,
+                     'ring-2 ring-inset ring-blue-500 z-10': dia.hoy,
+                     'bg-blue-50 dark:bg-blue-900/10': diaSeleccionado?.toDateString() === dia.fecha.toDateString()
+                   }">
+                <div class="flex justify-between items-start mb-1">
+                  <span [class]="dia.hoy ? 'bg-blue-600 text-white w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full text-[10px] sm:text-xs font-bold' : 'text-xs sm:text-sm font-bold text-gray-700 dark:text-slate-300'">
+                    {{ dia.num }}
+                  </span>
+                  <span *ngIf="dia.count > 0" class="text-[8px] sm:text-[10px] font-black px-1 sm:px-1.5 py-0.5 rounded bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
+                    {{ dia.count }}
+                  </span>
+                </div>
+                <!-- Mini indicadores (Solo Desktop) -->
+                <div class="space-y-1 overflow-hidden hidden sm:block">
+                  <div *ngFor="let res of dia.reservas?.slice(0, 2)" 
+                       class="text-[9px] truncate px-1 py-0.5 rounded border"
+                       [ngClass]="getEstadoColor(res.estado)">
+                    {{ res.nombre_cliente }}
+                  </div>
+                  <div *ngIf="dia.count > 2" class="text-[9px] text-gray-400 dark:text-slate-500 pl-1">
+                    +{{ dia.count - 2 }}...
+                  </div>
+                </div>
+                <!-- Puntos indicativos (Solo Mobile) -->
+                <div class="flex flex-wrap gap-0.5 mt-1 sm:hidden">
+                  <div *ngFor="let res of dia.reservas?.slice(0, 3)"
+                       class="w-1.5 h-1.5 rounded-full"
+                       [class.bg-yellow-500]="res.estado === 'pendiente'"
+                       [class.bg-green-500]="res.estado === 'confirmada'"
+                       [class.bg-gray-400]="res.estado !== 'pendiente' && res.estado !== 'confirmada'">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Panel de Detalle del Día -->
+          <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 flex flex-col transition-colors">
+            <div class="mb-6">
+              <h3 class="text-lg font-black text-gray-900 dark:text-slate-50">
+                {{ diaSeleccionado ? (diaSeleccionado | date:'fullDate') : 'Selecciona un día' }}
+              </h3>
+              <p class="text-xs text-gray-500 dark:text-slate-400 mt-1">Citas programadas para esta fecha</p>
+            </div>
+
+            <div class="flex-1 overflow-y-auto space-y-4">
+              <div *ngIf="reservacionesDelDia.length === 0" class="flex flex-col items-center justify-center py-12 text-center">
+                <div class="w-16 h-16 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mb-4">
+                  <i class="fas fa-calendar-day text-gray-300 dark:text-slate-500 text-2xl"></i>
+                </div>
+                <p class="text-sm font-bold text-gray-400 dark:text-slate-500">No hay citas registradas</p>
+              </div>
+
+              <div *ngFor="let res of reservacionesDelDia"
+                   (click)="verDetalle(res)"
+                   class="group border-l-4 p-4 rounded-r-xl bg-gray-50 dark:bg-slate-700/30 hover:bg-white dark:hover:bg-slate-700 transition cursor-pointer shadow-sm hover:shadow-md border-gray-200 dark:border-slate-600"
+                   [ngClass]="{
+                     'border-yellow-500': res.estado === 'pendiente',
+                     'border-green-500': res.estado === 'confirmada'
+                   }">
+                <div class="flex justify-between items-start mb-1">
+                  <p class="font-black text-gray-900 dark:text-slate-50 truncate">{{ res.nombre_cliente }}</p>
+                  <span class="text-[10px] font-black text-blue-600 dark:text-blue-400 whitespace-nowrap">
+                    {{ formatearHora(res.fecha_reservacion) }}
+                  </span>
+                </div>
+                <p class="text-[11px] text-gray-500 dark:text-slate-400 truncate">{{ res.servicio?.nombre || 'General' }}</p>
+                <div class="mt-2 flex items-center justify-between">
+                  <span class="text-[9px] px-2 py-0.5 rounded-full font-black border" [ngClass]="getEstadoColor(res.estado)">
+                    {{ getEstadoTexto(res.estado) }}
+                  </span>
+                  <i class="fas fa-arrow-right text-[10px] text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Empty State (Solo en modo lista) -->
+      <div *ngIf="vistaModo === 'lista' && reservacionesFiltradas.length === 0" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-12 text-center transition-colors">
+        <div class="w-24 h-24 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors">
+          <i class="fas fa-calendar-times text-gray-400 dark:text-slate-500 text-5xl"></i>
+        </div>
+        <h3 class="text-xl font-black text-gray-900 dark:text-slate-50 mb-2">No se encontraron reservaciones</h3>
+        <button *ngIf="terminoBusqueda || filtroEstado !== 'todos'" (click)="limpiarBusqueda(); cambiarFiltroEstado('todos')" class="mt-4 bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition">
+          Ver todas
+        </button>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div *ngIf="mostrarModal && reservaSeleccionada" class="fixed inset-0 z-50 overflow-y-auto" (click)="cerrarModal()">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 transition-opacity bg-gray-900 dark:bg-black bg-opacity-75 dark:bg-opacity-80"></div>
+
+    <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full transition-colors" (click)="$event.stopPropagation()">
+      <div [class]="'px-4 py-3 ' + getEstadoColor(reservaSeleccionada.estado)">
+        <div class="flex justify-between items-center">
+          <h3 class="font-black"><i class="fas fa-calendar mr-2"></i> Reserva #{{ reservaSeleccionada.id }}</h3>
+          <button (click)="cerrarModal()"><i class="fas fa-times text-xl"></i></button>
+        </div>
+      </div>
+      <div class="p-6 space-y-4">
+        <div>
+          <h4 class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase tracking-wider mb-2">Detalle de la Cita</h4>
+          <p class="text-lg font-bold text-gray-900 dark:text-slate-50">{{ reservaSeleccionada.servicio?.nombre || 'Servicio General' }}</p>
+          <p class="text-blue-600 dark:text-blue-400 font-bold mt-1 text-lg">
+            <i class="far fa-clock mr-2"></i>{{ formatearFechaLarga(reservaSeleccionada.fecha_reservacion) }}
+          </p>
+        </div>
+        <div class="grid grid-cols-2 gap-4 border-t dark:border-slate-700 pt-4">
+          <div>
+            <p class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Cliente</p>
+            <p class="font-bold text-gray-900 dark:text-slate-50">{{ reservaSeleccionada.nombre_cliente }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Teléfono</p>
+            <p class="font-bold text-gray-900 dark:text-slate-50"><i class="fab fa-whatsapp text-green-500 mr-1"></i>{{ formatearTelefono(reservaSeleccionada.telefono_cliente) }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Personas</p>
+            <p class="font-bold text-gray-900 dark:text-slate-50">{{ reservaSeleccionada.numero_personas }}</p>
+          </div>
+          <div>
+            <p class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase">Estado actual</p>
+            <span [class]="'inline-flex px-2 py-1 rounded-md text-xs font-bold border ' + getEstadoColor(reservaSeleccionada.estado)">
+              {{ getEstadoTexto(reservaSeleccionada.estado) }}
+            </span>
+          </div>
+        </div>
+        <div *ngIf="reservaSeleccionada.notas" class="border-t dark:border-slate-700 pt-4">
+          <p class="text-xs font-bold text-gray-500 dark:text-slate-400 uppercase mb-1">Notas del cliente</p>
+          <p class="text-gray-700 dark:text-slate-300 italic bg-gray-50 dark:bg-slate-900/40 p-2 rounded transition-colors">"{{ reservaSeleccionada.notas }}"</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

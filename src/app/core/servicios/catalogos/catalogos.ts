@@ -197,3 +197,5 @@ export class Catalogos {
   tieneStock(item: CatalogoItem): boolean { return (item.stock ?? 0) > 0; }
   estaDisponible(item: CatalogoItem): boolean { return item.disponible === true; }
 }
+
+

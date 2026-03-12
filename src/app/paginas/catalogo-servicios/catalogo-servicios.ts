@@ -1,9 +1,9 @@
-// catalogos-universal.component.ts
+// catalogo-servicios.ts
 import { Component, OnInit, ViewChild, ElementRef, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, NavigationEnd } from '@angular/router';
-import { Catalogos, CatalogoItem, Categoria } from '../../core/servicios/catalogos/catalogos';
+import { CatalogoServiciosService, CatalogoServicio, CategoriaServicio } from '../../core/servicios/catalogo-servicios/catalogo-servicios';
 import { Autenticacion } from '../../core/servicios/autenticacion/autenticacion';
 import { Fotos } from '../../core/servicios/fotos/fotos';
 import { SidebarComponent } from '../../componentes/aside/aside';
@@ -12,11 +12,12 @@ import { HeaderCatalogo } from '../../componentes-catalogo/header-catalogo/heade
 import { ModalSeleccionTipo } from '../../componentes-catalogo/modal-seleccion-tipo/modal-seleccion-tipo';
 import { ModalAgregar } from '../../componentes-catalogo/modal-agregar/modal-agregar';
 import { ModalCategorias } from '../../componentes-catalogo/modal-categorias/modal-categorias';
+import { ModalHorarios } from '../../componentes-catalogo/modal-horarios/modal-horarios';
 import { Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 @Component({
-  selector: 'app-catalogos-universal',
+  selector: 'app-catalogo-servicios',
   standalone: true,
   imports: [
     CommonModule,
@@ -25,12 +26,13 @@ import { filter } from 'rxjs/operators';
     HeaderCatalogo,
     catalogo,
     ModalAgregar,
-    ModalCategorias
+    ModalCategorias,
+    ModalHorarios
   ],
-  templateUrl: './catalogos-universal.html',
-  styleUrl: './catalogos-universal.css',
+  templateUrl: './catalogo-servicios.html',
+  styleUrl: './catalogo-servicios.css',
 })
-export class CatalogosUniversal implements OnInit, OnDestroy {
+export class CatalogoServiciosComponent implements OnInit, OnDestroy {
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   productosHabilitados = true;
@@ -46,11 +48,11 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
   empresaId: string = '';
   usuarioActual: any = null;
 
-  items: CatalogoItem[] = [];
-  itemsFiltrados: CatalogoItem[] = [];
+  items: any[] = [];
+  itemsFiltrados: any[] = [];
 
-  //  categoriasEnUso son objetos Categoria[], para el modal y el header
-  categoriasEnUso: Categoria[] = [];
+  //  categoriasEnUso son objetos CategoriaServicio[], para el modal y el header
+  categoriasEnUso: any[] = [];
 
   estadisticas: any = null;
 
@@ -67,23 +69,24 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
 
   paginaActual = 1;
   itemsPorPagina = 12;
-  itemsPaginados: CatalogoItem[] = [];
+  itemsPaginados: any[] = [];
 
   mostrarModal = false;
   modoEdicion = false;
   mostrarModalCategorias = false;
+  mostrarModalHorarios = false;
+  servicioHorarioActivo: any = null;
 
-  itemActual: Partial<CatalogoItem> = {
+  itemActual: any = {
     nombre_item: '',
     descripcion: '',
-    precio: null,
-    tipo_item: 'producto',
+    precio: undefined,
     imagen_url: '',
-    stock: null,
     disponible: true,
-    duracion_minutos: null,
-    requiere_agendamiento: false,
-    categoria_id: null,
+    duracion_minutos: undefined,
+    requiere_agendamiento: true,
+    categoria_id: undefined,
+    tipo_item: 'servicio',
     tags: ''
   };
 
@@ -100,7 +103,7 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private catalogoService: Catalogos,
+    private catalogoService: CatalogoServiciosService,
     private authService: Autenticacion,
     private fotosService: Fotos
   ) {
@@ -180,7 +183,7 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
    */
   cargarCategorias() {
     this.cargandoCategorias = true;
-    this.catalogoService.obtenerCategorias().subscribe({
+    this.catalogoService.obtenerCategorias(this.empresaId).subscribe({
       next: (response: any) => {
         if (response.success && Array.isArray(response.data)) {
           this.categoriasEnUso = response.data;
@@ -207,16 +210,15 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
   cargarCatalogo() {
     this.cargando = true;
 
-    const params: any = {};
-    if (this.filtroTipo !== 'todos') params.tipo_item = this.filtroTipo;
-    if (this.filtroCategoria !== 'todas') params.categoria_id = this.filtroCategoria;
-    if (this.filtroDisponible !== 'todos') params.disponible = this.filtroDisponible === 'disponible';
-    if (this.ordenamiento) params.orden = this.ordenamiento;
-
-    this.catalogoService.obtenerCatalogo(params).subscribe({
-      next: (response) => {
+    this.catalogoService.obtenerServicios(this.empresaId).subscribe({
+      next: (response: any) => {
         if (response.success && Array.isArray(response.data)) {
-          this.items = response.data;
+          // Mapeamos 'nombre' que viene del backend a 'nombre_item' esperado por UI compartida
+          this.items = response.data.map((i: any) => ({
+            ...i,
+            nombre_item: i.nombre,
+            tipo_item: 'servicio' // Flag para los modales
+          }));
           this.aplicarFiltros();
         }
         this.cargando = false;
@@ -229,10 +231,7 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
   }
 
   cargarEstadisticas() {
-    this.catalogoService.obtenerEstadisticas().subscribe({
-      next: (response) => { if (response.success) this.estadisticas = response.data; },
-      error: () => { }
-    });
+    // Pendiente endpoint en el backend para servicios
   }
 
   // ==================== FILTROS ====================
@@ -241,7 +240,7 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
     if (this.terminoBusqueda.trim()) {
       const termino = this.terminoBusqueda.toLowerCase();
       resultados = resultados.filter(item =>
-        item.nombre_item.toLowerCase().includes(termino) ||
+        item.nombre_item?.toLowerCase().includes(termino) ||
         item.descripcion?.toLowerCase().includes(termino) ||
         item.tags?.toLowerCase().includes(termino)
       );
@@ -262,20 +261,7 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
       this.actualizarPaginacion();
       return;
     }
-    const params: any = {};
-    if (this.filtroTipo !== 'todos') params.tipo_item = this.filtroTipo;
-    if (this.filtroCategoria !== 'todas') params.categoria_id = this.filtroCategoria;
-
-    this.catalogoService.buscarItems(this.terminoBusqueda, params).subscribe({
-      next: (response) => {
-        if (response.success && Array.isArray(response.data)) {
-          this.itemsFiltrados = response.data;
-          this.paginaActual = 1;
-          this.actualizarPaginacion();
-        }
-      },
-      error: () => { }
-    });
+    this.aplicarFiltros();
   }
 
   cambiarFiltroTipo(tipo: 'todos' | 'producto' | 'servicio') {
@@ -327,22 +313,22 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
 
   // ==================== MODALES ====================
   mostrarModalTipo() { 
-    this.abrirModalNuevoConTipo('producto'); 
+    this.abrirModalNuevo(); 
   }
 
-  abrirModalNuevoConTipo(tipo: 'producto' | 'servicio') {
+  abrirModalNuevo() {
     this.modoEdicion = false;
     this.itemActual = {
+      empresa_id: parseInt(this.empresaId),
       nombre_item: '',
       descripcion: '',
-      precio: null,
-      tipo_item: tipo,
+      precio: undefined,
       imagen_url: '',
-      stock: tipo === 'producto' ? 0 : null,
       disponible: true,
-      duracion_minutos: tipo === 'servicio' ? 30 : null,
-      requiere_agendamiento: tipo === 'servicio',
-      categoria_id: null,
+      duracion_minutos: undefined,
+      requiere_agendamiento: true,
+      categoria_id: undefined,
+      tipo_item: 'servicio',
       tags: ''
     };
     this.imagenSeleccionada = null;
@@ -351,7 +337,7 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
     this.mostrarModal = true;
   }
 
-  abrirModalEditar(item: CatalogoItem) {
+  abrirModalEditar(item: any) {
     this.modoEdicion = true;
     this.itemActual = { ...item };
     this.imagenAnterior = item.imagen_url || null;
@@ -363,13 +349,23 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
   cerrarModal() {
     this.mostrarModal = false;
     this.itemActual = {
-      nombre_item: '', descripcion: '', precio: null, tipo_item: 'producto',
-      imagen_url: '', stock: null, disponible: true, duracion_minutos: null,
-      requiere_agendamiento: false, categoria_id: null, tags: ''
+      nombre_item: '', descripcion: '', precio: undefined,
+      imagen_url: '', disponible: true, duracion_minutos: undefined,
+      requiere_agendamiento: true, categoria_id: undefined, tipo_item: 'servicio', tags: ''
     };
     this.imagenSeleccionada = null;
     this.imagenPreview = null;
     this.imagenAnterior = null;
+  }
+
+  abrirModalHorarios(item: any) {
+    this.servicioHorarioActivo = item;
+    this.mostrarModalHorarios = true;
+  }
+
+  cerrarModalHorarios() {
+    this.mostrarModalHorarios = false;
+    this.servicioHorarioActivo = null;
   }
 
   // ==================== IMÁGENES ====================
@@ -424,11 +420,19 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
    */
   async guardarItem() {
     if (!this.itemActual.nombre_item?.trim()) {
-      this.mostrarMensaje('error', 'El nombre del item es requerido');
+      this.mostrarMensaje('error', 'El nombre del servicio es requerido');
       return;
     }
 
     this.guardando = true;
+
+    // Convertir nombre_item intermedio a 'nombre'
+    const payload = {
+      ...this.itemActual,
+      nombre: this.itemActual.nombre_item
+    };
+    delete payload.nombre_item;
+    delete payload.tipo_item;
 
     try {
       if (this.imagenSeleccionada) {
@@ -437,8 +441,8 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
       }
 
       if (this.modoEdicion && this.itemActual.id) {
-        this.catalogoService.actualizarItem(this.itemActual.id, this.itemActual).subscribe({
-          next: (response) => {
+        this.catalogoService.actualizarServicio(this.itemActual.id, payload).subscribe({
+          next: (response: any) => {
             if (response.success) {
               this.mostrarMensaje('success', 'Item actualizado exitosamente');
               this.cargarCatalogo();
@@ -453,8 +457,9 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
           }
         });
       } else {
-        this.catalogoService.crearItem(this.itemActual as any).subscribe({
-          next: (response) => {
+        payload.empresa_id = parseInt(this.empresaId);
+        this.catalogoService.crearServicio(payload).subscribe({
+          next: (response: any) => {
             if (response.success) {
               this.mostrarMensaje('success', 'Item creado exitosamente');
               this.cargarCatalogo();
@@ -475,12 +480,12 @@ export class CatalogosUniversal implements OnInit, OnDestroy {
     }
   }
 
-  eliminarItem(item: CatalogoItem) {
+  eliminarItem(item: any) {
     if (!confirm(`¿Está seguro de eliminar "${item.nombre_item}"?`)) return;
     if (!item.id) return;
 
-    this.catalogoService.eliminarItem(item.id).subscribe({
-      next: (response) => {
+    this.catalogoService.eliminarServicio(item.id).subscribe({
+      next: (response: any) => {
         if (response.success) {
           this.mostrarMensaje('success', 'Item eliminado exitosamente');
           this.cargarCatalogo();

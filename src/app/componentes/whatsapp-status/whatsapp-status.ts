@@ -2,6 +2,7 @@ import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { interval, Subscription } from 'rxjs';
 import { InstanciasService } from '../../core/servicios/instancias/instancias';
+import { API_BASE_URL } from '../../core/config/api.config';
 
 interface EstadoWhatsApp {
   conectado: boolean;
@@ -43,6 +44,10 @@ export class WhatsappStatus implements OnInit, OnDestroy {
   intervaloVerificacion = 10000; // 10 segundos
   private verificacionSubscription?: Subscription;
 
+  get isMobile(): boolean {
+    return typeof window !== 'undefined' ? window.innerWidth < 1024 : false;
+  }
+
   notificacion: Notificacion = {
     mostrar: false,
     tipo: 'info',
@@ -68,7 +73,7 @@ export class WhatsappStatus implements OnInit, OnDestroy {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/whatsapp/public/estado/${this.empresaId}/empresa_${this.empresaId}`
+        `${API_BASE_URL}/api/whatsapp/public/estado/${this.empresaId}/empresa_${this.empresaId}`
       );
 
       const data = await response.json();
@@ -85,7 +90,7 @@ export class WhatsappStatus implements OnInit, OnDestroy {
         if (!this.estado.conectado) {
           try {
             const qrResponse = await fetch(
-              `http://localhost:3000/api/whatsapp/public/obtener-qr/${this.empresaId}/empresa_${this.empresaId}`
+              `${API_BASE_URL}/api/whatsapp/public/obtener-qr/${this.empresaId}/empresa_${this.empresaId}`
             );
             const qrData = await qrResponse.json();
 
@@ -119,7 +124,7 @@ export class WhatsappStatus implements OnInit, OnDestroy {
     this.conectando = true;
 
     try {
-      const response = await fetch('http://localhost:3000/api/whatsapp/public/iniciar-sesion', {
+      const response = await fetch(`${API_BASE_URL}/api/whatsapp/public/iniciar-sesion`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -154,7 +159,7 @@ export class WhatsappStatus implements OnInit, OnDestroy {
     try {
       // Primero cerrar la sesión actual
       await fetch(
-        `http://localhost:3000/api/whatsapp/public/cerrar-sesion/${this.empresaId}/empresa_${this.empresaId}`,
+        `${API_BASE_URL}/api/whatsapp/public/cerrar-sesion/${this.empresaId}/empresa_${this.empresaId}`,
         { method: 'POST' }
       );
 
@@ -182,7 +187,7 @@ export class WhatsappStatus implements OnInit, OnDestroy {
 
     try {
       const response = await fetch(
-        `http://localhost:3000/api/whatsapp/public/cerrar-sesion/${this.empresaId}/empresa_${this.empresaId}`,
+        `${API_BASE_URL}/api/whatsapp/public/cerrar-sesion/${this.empresaId}/empresa_${this.empresaId}`,
         { method: 'POST' }
       );
 

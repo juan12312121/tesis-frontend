@@ -23,7 +23,7 @@ export class OnboardingComponent implements OnInit {
     private route: ActivatedRoute,
     private authService: Autenticacion,
     private empresaService: EmpresaService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.empresaId = this.route.snapshot.paramMap.get('id') || '';
@@ -39,10 +39,19 @@ export class OnboardingComponent implements OnInit {
     }
   }
 
+  /**
+   * Actualiza el tipo de negocio seleccionado por el usuario durante el onboarding.
+   * @param tipo El tipo de negocio elegido ('productos' o 'servicios').
+   */
   seleccionar(tipo: 'productos' | 'servicios') {
     this.tipoSeleccionado = tipo;
   }
 
+  /**
+   * Confirma la seleccion del tipo de negocio y finaliza el proceso de onboarding.
+   * Envia la informacion al backend y, en caso de exito, actualiza el estado local
+   * y redirige al usuario hacia el panel principal (dashboard).
+   */
   async confirmar() {
     if (!this.tipoSeleccionado || this.guardando) return;
 
@@ -51,7 +60,7 @@ export class OnboardingComponent implements OnInit {
     this.empresaService.completarOnboarding(this.tipoSeleccionado).subscribe({
       next: (response: any) => {
         if (response.success) {
-          // Actualizar el tipo en el servicio de auth local
+          // Actualiza el estado en el servicio de autenticacion local
           this.authService.actualizarTipoNegocio(this.tipoSeleccionado!);
           this.router.navigate(['/dashboard', this.empresaId]);
         } else {

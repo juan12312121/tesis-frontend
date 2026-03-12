@@ -17,7 +17,7 @@ export class ModalAgregar {
   @Input() mostrarModal = false;
   @Input() modoEdicion = false;
   @Input() itemActual: Partial<CatalogoItem> = {};
-  // ✅ CORREGIDO: ahora es Categoria[] en lugar de string[]
+  //  CORREGIDO: ahora es Categoria[] en lugar de string[]
   @Input() categoriasDisponibles: Categoria[] = [];
   @Input() guardando = false;
   @Input() imagenPreview: string | null = null;

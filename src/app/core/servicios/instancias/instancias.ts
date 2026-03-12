@@ -68,14 +68,18 @@ export class InstanciasService {
   constructor(
     private http: HttpClient,
     private auth: Autenticacion
-  ) {}
+  ) { }
 
   // ========================================
-  // 🌐 MÉTODOS PÚBLICOS (SIN AUTENTICACIÓN)
+  //  MÉTODOS PÚBLICOS (SIN AUTENTICACIÓN)
   // ========================================
 
   /**
-   * Iniciar sesión de WhatsApp (público)
+   * Solicita el inicio de una sesion publica de WhatsApp para una empresa especifica.
+   * Crea una nueva instancia de conexion o reactiva una existente.
+   * @param empresaId Identificador de la empresa
+   * @param nombreSesion Nombre asignado a la sesion de WhatsApp
+   * @returns Un Observable con la respuesta del inicio de sesion, que puede contener el codigo QR.
    */
   iniciarSesionPublica(empresaId: number, nombreSesion: string): Observable<IniciarSesionResponse> {
     return this.http.post<IniciarSesionResponse>(
@@ -134,10 +138,13 @@ export class InstanciasService {
   }
 
   /**
-   * Verificación automática de estado (público)
+   * Inicia un proceso de verificacion periodica del estado de conexion de WhatsApp.
+   * Este metodo consulta de forma automatica y repetitiva el servidor para detectar cambios
+   * en el estado de la sesion (por ejemplo, cuando se escanea exitosamente el codigo QR).
    * @param empresaId ID de la empresa
-   * @param nombreSesion Nombre de la sesión
-   * @param intervaloSegundos Intervalo en segundos (por defecto 5)
+   * @param nombreSesion Nombre de la sesion
+   * @param intervaloSegundos Rango de tiempo entre cada peticion (por defecto 5 segundos)
+   * @returns Observable que emite el estado publico de la conexion en cada intervalo
    */
   verificarEstadoAutomaticoPublico(
     empresaId: number,
@@ -152,7 +159,7 @@ export class InstanciasService {
   }
 
   // ========================================
-  // 🔒 MÉTODOS PROTEGIDOS (CON AUTENTICACIÓN)
+  //  MÉTODOS PROTEGIDOS (CON AUTENTICACIÓN)
   // ========================================
 
   /**
@@ -381,11 +388,15 @@ export class InstanciasService {
   }
 
   // ========================================
-  // 🛠️ UTILIDADES
+  // UTILIDADES
   // ========================================
 
   /**
-   * Formatear número de teléfono
+   * Normaliza el formato del numero de telefono para su correcto procesamiento.
+   * Elimina todos los caracteres no numericos y asegura que el numero incluya el 
+   * codigo de pais correspondiente (por defecto agrega 52 para Mexico si no esta presente).
+   * @param numero Numero original a formatear
+   * @returns Numero limpio y estandarizado
    */
   formatearNumero(numero: string): string {
     // Eliminar caracteres no numéricos
@@ -455,3 +466,5 @@ export class InstanciasService {
     };
   }
 }
+
+

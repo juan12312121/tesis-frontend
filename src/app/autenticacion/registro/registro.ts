@@ -134,18 +134,23 @@ export class RegistroComponent implements OnInit, OnDestroy {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  /**
+   * Envia los datos completos del usuario y la empresa al backend para generar el registro.
+   * Maneja el estado de carga y las validaciones de error. Tras un registro exitoso,
+   * indica al componente que proceda con la verificacion por correo electronico.
+   */
   async submitStep2(): Promise<void> {
     if (this.step2Form.valid && !this.isSubmitting) {
       Object.assign(this.datosUsuario, this.step2Form.value);
       this.isSubmitting = true;
 
       try {
-        console.log('📝 Registrando usuario y empresa...', this.datosUsuario);
+        console.log(' Registrando usuario y empresa...', this.datosUsuario);
 
         // Llamar al servicio de registro
         this.authService.registro(this.datosUsuario).subscribe({
           next: (response) => {
-            console.log('✅ Respuesta del registro:', response);
+            console.log(' Respuesta del registro:', response);
 
             if (response.success) {
               // Guardar información temporalmente
@@ -177,7 +182,7 @@ export class RegistroComponent implements OnInit, OnDestroy {
             }
           },
           error: (error) => {
-            console.error('❌ Error en el registro:', error);
+            console.error(' Error en el registro:', error);
             this.displayMessage(
               'error',
               error.error?.message || 'Error al crear la cuenta. Por favor intenta nuevamente.'
@@ -187,16 +192,22 @@ export class RegistroComponent implements OnInit, OnDestroy {
         });
 
       } catch (error) {
-        console.error('❌ Error:', error);
+        console.error(' Error:', error);
         this.displayMessage('error', 'Error al crear la cuenta. Por favor intenta nuevamente.');
         this.isSubmitting = false;
       }
     }
   }
 
-  // ==================== VERIFICACIÓN DE EMAIL ====================
+  // ==================== VERIFICACION DE EMAIL ====================
+
+  /**
+   * Inicia un temporizador que consulta de forma periodica al servidor para verificar
+   * si el usuario activo ha validado su correo electronico haciendo clic en el enlace.
+   * Tambien establece un tiempo maximo (timeout) tras el cual se detienen las consultas.
+   */
   iniciarVerificacionEmail(): void {
-    console.log('🔄 Iniciando verificación automática de email...');
+    console.log(' Iniciando verificación automática de email...');
 
     // Verificar cada 5 segundos si el usuario verificó su email
     this.qrCheckInterval = setInterval(() => {
@@ -225,7 +236,7 @@ export class RegistroComponent implements OnInit, OnDestroy {
         next: (response) => {
           if (response.success && response.token) {
             // Email verificado exitosamente
-            console.log('✅ Email verificado, procediendo a conectar WhatsApp');
+            console.log(' Email verificado, procediendo a conectar WhatsApp');
             this.detenerVerificaciones();
             this.verificacionEmailPendiente = false;
 
@@ -251,17 +262,23 @@ export class RegistroComponent implements OnInit, OnDestroy {
     }
   }
 
-  // ==================== GENERACIÓN DE QR WHATSAPP ====================
+  // ==================== GENERACION DE QR WHATSAPP ====================
+
+  /**
+   * Solicita a la API la generacion de un codigo QR para vincular la cuenta de WhatsApp
+   * de la empresa. Inicia de manera concurrente un intervalo de verificacion para 
+   * detectar cuando el cliente realiza el escaneo del codigo desde su telefono.
+   */
   async generateQRCode(): Promise<void> {
     try {
       this.isGeneratingQR = true;
       this.qrCode = '';
 
-      console.log('📱 Solicitando código QR de WhatsApp...');
+      console.log(' Solicitando código QR de WhatsApp...');
 
       this.whatsappService.obtenerQR().subscribe({
         next: (response) => {
-          console.log('📱 Respuesta QR:', response);
+          console.log(' Respuesta QR:', response);
 
           if (response.success && response.qrCode) {
             this.qrCode = response.qrCode;
@@ -274,7 +291,7 @@ export class RegistroComponent implements OnInit, OnDestroy {
 
           } else if (response.conectado) {
             // Ya está conectado
-            console.log('✅ WhatsApp ya está conectado');
+            console.log(' WhatsApp ya está conectado');
             this.onWhatsAppConnected();
 
           } else {
@@ -283,14 +300,14 @@ export class RegistroComponent implements OnInit, OnDestroy {
           }
         },
         error: (error) => {
-          console.error('❌ Error al generar QR:', error);
+          console.error(' Error al generar QR:', error);
           this.displayMessage('error', 'Error al generar código QR. Intenta nuevamente.');
           this.isGeneratingQR = false;
         }
       });
 
     } catch (error) {
-      console.error('❌ Error al generar QR:', error);
+      console.error(' Error al generar QR:', error);
       this.displayMessage('error', 'Error al generar código QR. Intenta nuevamente.');
       this.isGeneratingQR = false;
     }
@@ -300,7 +317,7 @@ export class RegistroComponent implements OnInit, OnDestroy {
     // Limpiar cualquier intervalo previo
     this.detenerVerificaciones();
 
-    console.log('🔄 Iniciando verificación de conexión WhatsApp...');
+    console.log(' Iniciando verificación de conexión WhatsApp...');
 
     // Verificar conexión cada 3 segundos
     this.qrCheckInterval = setInterval(() => {
@@ -321,7 +338,7 @@ export class RegistroComponent implements OnInit, OnDestroy {
       this.whatsappService.obtenerEstado().subscribe({
         next: (response) => {
           if (response.success && response.data.conectado) {
-            console.log('✅ WhatsApp conectado exitosamente');
+            console.log(' WhatsApp conectado exitosamente');
             this.onWhatsAppConnected();
           }
         },

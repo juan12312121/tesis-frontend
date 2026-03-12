@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable, BehaviorSubject } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { Router } from '@angular/router';
+import { API_URL } from '../../config/api.config';
 
 interface RegistroData {
   nombre_empresa: string;
@@ -42,7 +43,7 @@ interface AuthResponse {
   providedIn: 'root',
 })
 export class Autenticacion {
-  private readonly API_URL = 'http://localhost:3000/api';
+  private readonly API_URL = API_URL;
 
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(this.hasToken());
   public isAuthenticated$ = this.isAuthenticatedSubject.asObservable();

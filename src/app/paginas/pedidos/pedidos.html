@@ -9,36 +9,36 @@
 </div>
 
 <!-- Main Layout with Sidebar -->
-<div *ngIf="!cargando" class="flex h-screen overflow-hidden bg-gray-50">
+<div *ngIf="!cargando" class="flex h-screen overflow-hidden bg-gray-50 dark:bg-slate-900 transition-colors">
 
   <!-- Sidebar Component -->
   <app-sidebar [sidebarOpen]="sidebarOpen" [empresa]="empresa" [usuario]="usuario" [currentRoute]="currentRoute"
-    [unreadMessages]="0" (navigate)="handleNavigation($event)" (logout)="handleLogout()">
+    [unreadMessages]="0" (navigate)="handleNavigation($event)" (logout)="handleLogout()" (toggleSidebarEvent)="toggleSidebar()">
   </app-sidebar>
 
   <!-- Main Content Area -->
   <div class="flex-1 flex flex-col overflow-hidden">
 
     <!-- Top Header -->
-    <header class="bg-white shadow-sm border-b border-gray-200">
+    <header class="bg-white dark:bg-slate-800 shadow-sm border-b border-gray-200 dark:border-slate-700 transition-colors">
       <div class="flex items-center justify-between px-4 sm:px-6 py-4">
         <div class="flex items-center space-x-4">
           <button (click)="toggleSidebar()" class="lg:hidden text-gray-600 hover:text-gray-900">
             <i class="fas fa-bars text-xl"></i>
           </button>
           <div>
-            <h2 class="text-xl sm:text-2xl font-black text-gray-900 flex items-center space-x-2">
-              <i class="fas fa-shopping-cart text-blue-600"></i>
+            <h2 class="text-xl sm:text-2xl font-black text-gray-900 dark:text-slate-50 flex items-center space-x-2">
+              <i class="fas fa-shopping-cart text-blue-600 dark:text-blue-400"></i>
               <span>Gestión de Pedidos</span>
             </h2>
-            <p class="text-xs sm:text-sm text-gray-500 font-medium hidden sm:block">Administra y da seguimiento a tus pedidos</p>
+            <p class="text-xs sm:text-sm text-gray-500 dark:text-slate-400 font-medium hidden sm:block">Administra y da seguimiento a tus pedidos</p>
           </div>
         </div>
       </div>
     </header>
 
     <!-- Content Area with Scroll -->
-    <main class="flex-1 overflow-y-auto bg-gray-50 p-4 sm:p-6">
+    <main class="flex-1 overflow-y-auto bg-gray-50 dark:bg-slate-900 p-4 sm:p-6 transition-colors">
 
       <!-- Mensaje de notificación -->
       <div *ngIf="mensaje.mostrar" [class]="'mb-6 p-4 rounded-lg border flex items-center justify-between ' +
@@ -55,11 +55,11 @@
       </div>
 
       <!-- Filtros y Búsqueda -->
-      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 sm:p-6 mb-6">
+      <div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-4 sm:p-6 mb-6 transition-colors">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Búsqueda -->
           <div class="md:col-span-2">
-            <label class="block text-sm font-bold text-gray-700 mb-2">
+            <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">
               <i class="fas fa-search mr-2"></i>Buscar Pedido
             </label>
             <div class="relative flex space-x-2">
@@ -67,7 +67,7 @@
                 <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                 <input type="text" [(ngModel)]="terminoBusqueda" (input)="aplicarFiltros()"
                   placeholder="Buscar por cliente, teléfono o ID..."
-                  class="w-full pl-10 pr-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium">
+                  class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-50 border-2 border-gray-300 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium">
               </div>
               <button *ngIf="terminoBusqueda" (click)="limpiarBusqueda()"
                 class="bg-gray-200 text-gray-700 font-bold px-4 py-3 rounded-lg hover:bg-gray-300 transition">
@@ -78,11 +78,11 @@
 
           <!-- Items por página -->
           <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">
+            <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">
               <i class="fas fa-list-ol mr-2"></i>Mostrar
             </label>
             <select [(ngModel)]="itemsPorPagina" (change)="actualizarPaginacion()"
-              class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium">
+              class="w-full px-4 py-3 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-50 border-2 border-gray-300 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium">
               <option [value]="10">10 pedidos</option>
               <option [value]="25">25 pedidos</option>
               <option [value]="50">50 pedidos</option>
@@ -93,7 +93,7 @@
 
         <!-- Filtros de estado -->
         <div class="mt-4">
-          <label class="block text-sm font-bold text-gray-700 mb-2">
+          <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">
             <i class="fas fa-filter mr-2"></i>Filtrar por estado
           </label>
           <div class="flex flex-wrap gap-2">
@@ -137,16 +137,16 @@
       </div>
 
       <!-- Tabla de Pedidos -->
-      <div *ngIf="pedidosFiltrados.length > 0" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div *ngIf="pedidosFiltrados.length > 0" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden transition-colors">
 
         <!-- Header de la tabla con contador -->
-        <div class="px-6 py-4 border-b border-gray-200 bg-gray-50">
+        <div class="px-6 py-4 border-b border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 transition-colors">
           <div class="flex items-center justify-between">
-            <h3 class="text-lg font-black text-gray-900">
-              <i class="fas fa-list mr-2 text-blue-600"></i>
+            <h3 class="text-lg font-black text-gray-900 dark:text-slate-50">
+              <i class="fas fa-list mr-2 text-blue-600 dark:text-blue-400"></i>
               Lista de Pedidos
             </h3>
-            <span class="text-sm font-semibold text-gray-600">
+            <span class="text-sm font-semibold text-gray-600 dark:text-slate-400">
               Mostrando {{ rangoItems }}
             </span>
           </div>
@@ -155,53 +155,38 @@
         <!-- Tabla responsive -->
         <div class="overflow-x-auto">
           <table class="w-full">
-            <thead class="bg-gray-100 border-b-2 border-gray-300">
+            <thead class="bg-gray-100 dark:bg-slate-700 border-b-2 border-gray-300 dark:border-slate-600 transition-colors">
               <tr>
-                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">ID</th>
-                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Cliente</th>
-                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">WhatsApp</th>
-                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Estado</th>
-                <th class="px-6 py-4 text-right text-xs font-black text-gray-700 uppercase tracking-wider">Total</th>
-                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 uppercase tracking-wider">Fecha</th>
-                <th class="px-6 py-4 text-center text-xs font-black text-gray-700 uppercase tracking-wider">Acciones</th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-slate-300 uppercase tracking-wider">Cliente</th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-slate-300 uppercase tracking-wider hidden sm:table-cell">WhatsApp</th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-slate-300 uppercase tracking-wider">Estado</th>
+                <th class="px-6 py-4 text-right text-xs font-black text-gray-700 dark:text-slate-300 uppercase tracking-wider">Total</th>
+                <th class="px-6 py-4 text-left text-xs font-black text-gray-700 dark:text-slate-300 uppercase tracking-wider hidden lg:table-cell">Fecha</th>
+                <th class="px-6 py-4 text-center text-xs font-black text-gray-700 dark:text-slate-300 uppercase tracking-wider">Acciones</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-gray-200">
-              <tr *ngFor="let pedido of pedidosPaginados" class="hover:bg-blue-50 transition">
-
-                <!-- ID -->
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="flex items-center">
-                    <div class="w-10 h-10 rounded-lg bg-blue-100 flex items-center justify-center">
-                      <i class="fas fa-hashtag text-blue-600"></i>
-                    </div>
-                    <span class="ml-3 text-sm font-black text-gray-900">{{ pedido.id }}</span>
-                  </div>
-                </td>
+            <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+              <tr *ngFor="let pedido of pedidosPaginados" class="hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-colors">
 
                 <!-- Cliente -->
                 <td class="px-6 py-4">
                   <div class="flex items-center">
-                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold">
+                    <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center text-white font-bold text-xs sm:text-sm flex-shrink-0">
                       {{ pedido.nombre_cliente ? pedido.nombre_cliente.charAt(0).toUpperCase() : '?' }}
                     </div>
-                    <div class="ml-3">
-                      <p class="text-sm font-bold text-gray-900">{{ pedido.nombre_cliente || 'Sin nombre' }}</p>
+                    <div class="ml-2 sm:ml-3 min-w-0">
+                      <p class="text-xs sm:text-sm font-bold text-gray-900 dark:text-slate-50 truncate">{{ pedido.nombre_cliente || 'Sin nombre' }}</p>
+                      <p class="text-[10px] text-gray-500 dark:text-slate-400 sm:hidden">#{{ pedido.id }}</p>
                     </div>
                   </div>
                 </td>
 
-                <!-- WhatsApp - Solo mostrar número -->
-                <td class="px-6 py-4 whitespace-nowrap">
+                <!-- WhatsApp -->
+                <td class="px-6 py-4 whitespace-nowrap hidden sm:table-cell">
                   <span *ngIf="pedido.telefono_cliente || $any(pedido).jid_whatsapp"
-                        class="inline-flex items-center space-x-1 text-sm font-semibold text-gray-700">
-                    <i class="fab fa-whatsapp text-green-600"></i>
+                        class="inline-flex items-center space-x-1 text-sm font-semibold text-gray-700 dark:text-slate-300">
+                    <i class="fab fa-whatsapp text-green-600 dark:text-green-400"></i>
                     <span>{{ formatearTelefono($any(pedido).jid_whatsapp || pedido.telefono_cliente) }}</span>
-                  </span>
-
-                  <span *ngIf="!pedido.telefono_cliente && !$any(pedido).jid_whatsapp"
-                        class="text-sm text-gray-400 font-medium">
-                    Sin contacto
                   </span>
                 </td>
 
@@ -215,14 +200,14 @@
 
                 <!-- Total -->
                 <td class="px-6 py-4 whitespace-nowrap text-right">
-                  <span class="text-lg font-black text-gray-900">{{ formatearPrecio(pedido.total) }}</span>
+                  <span class="text-sm sm:text-lg font-black text-gray-900 dark:text-white">{{ formatearPrecio(pedido.total) }}</span>
                 </td>
 
                 <!-- Fecha -->
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td class="px-6 py-4 whitespace-nowrap hidden lg:table-cell">
                   <div class="text-sm">
-                    <p class="text-gray-900 font-semibold">{{ formatearFechaCorta(pedido.fecha_creacion) }}</p>
-                    <p class="text-gray-500 text-xs">{{ formatearHora(pedido.fecha_creacion) }}</p>
+                    <p class="text-gray-900 dark:text-slate-50 font-semibold">{{ formatearFechaCorta(pedido.fecha_creacion) }}</p>
+                    <p class="text-gray-500 dark:text-slate-400 text-xs">{{ formatearHora(pedido.fecha_creacion) }}</p>
                   </div>
                 </td>
 

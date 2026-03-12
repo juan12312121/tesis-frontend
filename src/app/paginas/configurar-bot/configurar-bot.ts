@@ -7,7 +7,8 @@ import { Horarios } from '../../componentes/configuracion-bot/horarios/horarios'
 import { Mensajes, RespuestaAutomatica } from '../../componentes/configuracion-bot/mensajes/mensajes';
 import { ModalHorarios } from '../../componentes/configuracion-bot/modal-horarios/modal-horarios';
 import { ModalMensajes } from '../../componentes/configuracion-bot/modal-mensajes/modal-mensajes';
-import { ChatbotService, ConfiguracionChatbot } from '../../core/servicios/configuracion/configuracion'; // ✅ IMPORTAR SERVICIO
+import { ChatbotService, ConfiguracionChatbot } from '../../core/servicios/configuracion/configuracion'; //  IMPORTAR SERVICIO
+import { Autenticacion } from '../../core/servicios/autenticacion/autenticacion';
 
 @Component({
   selector: 'app-configurar-bot',
@@ -25,7 +26,8 @@ import { ChatbotService, ConfiguracionChatbot } from '../../core/servicios/confi
 })
 export class ConfigurarBotComponent implements OnInit {
   private router = inject(Router);
-  private chatbotService = inject(ChatbotService); // ✅ INYECTAR SERVICIO
+  private chatbotService = inject(ChatbotService); //  INYECTAR SERVICIO
+  private authService = inject(Autenticacion);
 
   // Estado general
   isLoading = true;
@@ -76,13 +78,13 @@ export class ConfigurarBotComponent implements OnInit {
       this.sidebarOpen = true;
     }
 
-    // ✅ Inicializar días de la semana desde el servicio
+    //  Inicializar días de la semana desde el servicio
     this.inicializarDiasSemana();
 
     this.loadData();
   }
 
-  // ✅ Inicializar días desde el servicio
+  //  Inicializar días desde el servicio
   private inicializarDiasSemana() {
     const diasCompletos = this.chatbotService.obtenerDiasSemana();
     this.diasSemana = diasCompletos.map(dia => ({
@@ -93,36 +95,42 @@ export class ConfigurarBotComponent implements OnInit {
     }));
   }
 
+  /**
+   * Inicializa la vista cargando el ID de la empresa, y luego realiza
+   * peticiones al servidor para obtener la configuracion actual del chatbot
+   * y sus respuestas predefinidas.
+   */
   async loadData() {
     try {
       this.isLoading = true;
 
       this.empresaId = this.obtenerEmpresaId();
+      const usuarioActual = this.authService.getUsuario();
 
       // Cargar datos de empresa y usuario (estos podrías también obtenerlos de un servicio)
       this.empresa = {
         id: this.empresaId,
-        nombre: 'Mi Empresa',
-        tipo: 'Restaurante',
+        nombre: usuarioActual?.empresa?.nombre || 'Mi Empresa',
+        tipo: usuarioActual?.empresa?.tipo_negocio || 'ambos',
         logo: null,
-        modulos: {
+        modulos: usuarioActual?.empresa?.modulos || {
           pedidos: true,
           reservas: true,
           catalogo: true
         }
       };
 
-      this.usuario = {
+      this.usuario = usuarioActual || {
         id: '1',
         nombre: 'Usuario',
         email: 'usuario@example.com',
         rol: 'Administrador'
       };
 
-      // ✅ CARGAR CONFIGURACIÓN REAL
+      //  CARGAR CONFIGURACIÓN REAL
       await this.cargarConfiguracion();
 
-      // ✅ CARGAR RESPUESTAS REALES
+      //  CARGAR RESPUESTAS REALES
       await this.cargarRespuestas();
 
     } catch (error) {
@@ -135,26 +143,34 @@ export class ConfigurarBotComponent implements OnInit {
   }
 
   private obtenerEmpresaId(): string {
-  // 1. Intentar desde la URL
-  const url = window.location.pathname;
-  const match = url.match(/\/dashboard\/(\d+)/);
-  if (match) return match[1];
+    // 1. Intentar desde la URL
+    const url = window.location.pathname;
+    const match = url.match(/\/dashboard\/(\d+)/);
+    if (match) return match[1];
 
-  // 2. Intentar desde localStorage
-  const empresaGuardada = localStorage.getItem('empresa_id');
-  if (empresaGuardada) return empresaGuardada;
+    // 2. Intentar desde localStorage
+    const empresaGuardada = localStorage.getItem('empresa_id');
+    if (empresaGuardada) return empresaGuardada;
 
-  // 3. Intentar desde el token/usuario guardado
-  const userData = localStorage.getItem('usuario') || localStorage.getItem('user');
-  if (userData) {
-    const user = JSON.parse(userData);
-    return user.empresa_id?.toString() || '';
+    // 3. Intentar desde el token/usuario guardado
+    const userData = localStorage.getItem('usuario') || localStorage.getItem('user');
+    if (userData) {
+      const user = JSON.parse(userData);
+      return user.empresa_id?.toString() || '';
+    }
+
+    return '';
   }
 
-  return '';
-}
+  // ========================================
+  // CONFIGURACION GENERAL DEL CHATBOT
+  // ========================================
 
-  // ✅ CARGAR CONFIGURACIÓN DESDE EL BACKEND
+  /**
+   * Obtiene la configuracion del chatbot vinculada a la empresa actual.
+   * Si existe, actualiza los controles de la interfaz; si no, inicializa 
+   * una configuracion por defecto.
+   */
   async cargarConfiguracion() {
     try {
       const response = await this.chatbotService
@@ -168,7 +184,7 @@ export class ConfigurarBotComponent implements OnInit {
         // Actualizar estado de días laborales
         this.actualizarEstadoDias();
 
-        console.log('✅ Configuración cargada:', this.configuracion);
+        console.log(' Configuración cargada:', this.configuracion);
       } else {
         this.hasConfiguration = false;
         this.resetConfiguracion();
@@ -200,7 +216,7 @@ export class ConfigurarBotComponent implements OnInit {
     });
   }
 
-  // ✅ CARGAR RESPUESTAS DESDE EL BACKEND
+  //  CARGAR RESPUESTAS DESDE EL BACKEND
   async cargarRespuestas() {
     this.loadingRespuestas = true;
     try {
@@ -211,7 +227,7 @@ export class ConfigurarBotComponent implements OnInit {
       if (response?.success && response.data) {
         this.respuestas = response.data;
         this.filteredRespuestas = this.respuestas;
-        console.log('✅ Respuestas cargadas:', this.respuestas.length);
+        console.log(' Respuestas cargadas:', this.respuestas.length);
       } else {
         this.respuestas = [];
         this.filteredRespuestas = [];
@@ -239,6 +255,7 @@ export class ConfigurarBotComponent implements OnInit {
   }
 
   handleNavigation(route: string) {
+    if (window.innerWidth < 1024) this.sidebarOpen = false;
     this.router.navigate([route]);
   }
 
@@ -272,7 +289,11 @@ export class ConfigurarBotComponent implements OnInit {
     this.showModalHorarios = false;
   }
 
-  // ✅ GUARDAR CONFIGURACIÓN CON SERVICIO
+  /**
+   * Valida y guarda los cambios realizados en la configuracion del bot
+   * (mensajes, horarios, dias activos). Hace una peticion POST o PUT
+   * dependiendo de si ya existe una configuracion previa o es nueva.
+   */
   async guardarConfiguracion() {
     try {
       this.isSaving = true;
@@ -280,7 +301,7 @@ export class ConfigurarBotComponent implements OnInit {
       // Actualizar días laborales
       this.actualizarDiasLaboralesEnConfig();
 
-      // ✅ Validar con el servicio
+      //  Validar con el servicio
       const validacion = this.chatbotService.validarConfiguracion(this.configuracion);
       if (!validacion.valido) {
         this.errorMessage = validacion.errores.join('. ');
@@ -301,12 +322,12 @@ export class ConfigurarBotComponent implements OnInit {
       let response;
 
       if (this.hasConfiguration) {
-        // ✅ Actualizar configuración existente
+        //  Actualizar configuración existente
         response = await this.chatbotService
           .actualizarConfiguracion(this.empresaId, configuracionData)
           .toPromise();
       } else {
-        // ✅ Crear nueva configuración
+        //  Crear nueva configuración
         response = await this.chatbotService
           .crearConfiguracion(this.empresaId, configuracionData)
           .toPromise();
@@ -336,7 +357,7 @@ export class ConfigurarBotComponent implements OnInit {
     }
   }
 
-  // ✅ ELIMINAR CONFIGURACIÓN CON SERVICIO
+  //  ELIMINAR CONFIGURACIÓN CON SERVICIO
   async eliminarConfiguracion() {
     if (!confirm('¿Estás seguro de eliminar la configuración? Esta acción no se puede deshacer.')) {
       return;
@@ -396,12 +417,20 @@ export class ConfigurarBotComponent implements OnInit {
     this.editingRespuesta = null;
   }
 
-  // ✅ GUARDAR RESPUESTA CON SERVICIO
+  // ========================================
+  // GESTION DE RESPUESTAS AUTOMATICAS
+  // ========================================
+
+  /**
+   * Registra una nueva respuesta automatica o actualiza una existente
+   * para que el bot la utilice segun su comando de activacion (texto disparador).
+   * @param respuestaData Objeto con el disparador, el texto o contenido de respuesta y el tipo.
+   */
   async guardarRespuesta(respuestaData: Partial<RespuestaAutomatica>) {
     try {
       this.isSaving = true;
 
-      // ✅ Validar con el servicio
+      //  Validar con el servicio
       const validacion = this.chatbotService.validarRespuesta(respuestaData);
       if (!validacion.valido) {
         this.errorMessage = validacion.errores.join('. ');
@@ -412,14 +441,14 @@ export class ConfigurarBotComponent implements OnInit {
       let response;
 
       if (this.editingRespuesta?.id) {
-        // ✅ Actualizar respuesta existente
+        //  Actualizar respuesta existente
         response = await this.chatbotService
           .actualizarRespuesta(this.empresaId, this.editingRespuesta.id, respuestaData)
           .toPromise();
 
         this.successMessage = 'Respuesta actualizada exitosamente';
       } else {
-        // ✅ Crear nueva respuesta
+        //  Crear nueva respuesta
         const nuevaRespuesta = {
           texto_disparador: respuestaData.texto_disparador!,
           respuesta: respuestaData.respuesta!,
@@ -450,7 +479,7 @@ export class ConfigurarBotComponent implements OnInit {
     }
   }
 
-  // ✅ ELIMINAR RESPUESTA CON SERVICIO
+  //  ELIMINAR RESPUESTA CON SERVICIO
   async eliminarRespuesta(respuesta: RespuestaAutomatica) {
     if (!confirm(`¿Estás seguro de eliminar la respuesta "${respuesta.texto_disparador}"?`)) {
       return;

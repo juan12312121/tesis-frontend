@@ -37,6 +37,10 @@ export class Login {
     this.showPassword = !this.showPassword;
   }
 
+  /**
+   * Maneja el evento de envio del formulario de inicio de sesion.
+   * Valida que el formulario sea correcto antes de proceder con la autenticacion.
+   */
   onSubmit(): void {
     if (this.loginForm.invalid || this.isSubmitting) {
       this.markFormGroupTouched(this.loginForm);
@@ -46,6 +50,10 @@ export class Login {
     this.iniciarSesion();
   }
 
+  /**
+   * Ejecuta el proceso de autenticacion comunicandose con el servicio correspondiente.
+   * Verifica el estado del onboarding del usuario para redirigirlo a la pantalla adecuada.
+   */
   private iniciarSesion(): void {
     const { correo, password } = this.loginForm.value;
 
@@ -59,7 +67,8 @@ export class Login {
 
           const empresaId = response.usuario.empresa_id;
 
-          // ✅ NUEVO: si no completó el onboarding, redirigir ahí primero
+          // Nota: si el usuario no ha completado el flujo de configuracion inicial (onboarding),
+          // se le redirige a dicha pantalla antes de permitirle acceder al dashboard.
           const onboardingCompletado = response.usuario.empresa?.onboarding_completado;
 
           setTimeout(() => {
@@ -78,8 +87,8 @@ export class Login {
       error: (error) => {
         console.error('Error de login:', error);
         const mensaje = error.error?.message ||
-                        error.message ||
-                        'Error al iniciar sesión. Por favor intenta nuevamente.';
+          error.message ||
+          'Error al iniciar sesión. Por favor intenta nuevamente.';
         this.showMessage(false, mensaje);
         this.isSubmitting = false;
       }

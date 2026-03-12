@@ -1,0 +1,89 @@
+<div *ngIf="mostrarModal" class="fixed inset-0 z-50 overflow-y-auto" (click)="cerrarModal()">
+  <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+    <div class="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75"></div>
+
+    <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-xl sm:w-full" (click)="$event.stopPropagation()">
+      
+      <!-- Header -->
+      <div class="px-6 py-4 border-b border-gray-200 bg-gradient-to-r from-blue-600 to-indigo-700 text-white">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-3">
+            <div class="p-2 bg-white bg-opacity-20 rounded-lg">
+              <i class="far fa-clock text-xl"></i>
+            </div>
+            <div>
+              <h3 class="font-black text-lg">Horario de Disponibilidad</h3>
+              <p class="text-xs text-blue-100 font-semibold truncate max-w-[200px] sm:max-w-sm">{{ nombreServicio }}</p>
+            </div>
+          </div>
+          <button (click)="cerrarModal()" class="text-white hover:text-gray-200 transition p-1">
+            <i class="fas fa-times text-xl"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Loader -->
+      <div *ngIf="cargando" class="p-12 text-center">
+        <i class="fas fa-spinner fa-spin text-4xl text-blue-600 mb-4"></i>
+        <p class="text-gray-600 font-semibold">Cargando esquema de horarios...</p>
+      </div>
+
+      <!-- Content -->
+      <div *ngIf="!cargando" class="p-6">
+        <p class="text-sm text-gray-600 mb-6 font-medium">Define los días y los bloques de horario exactos en los que ofreces este servicio. Si un día no está marcado, no se podrán agendar citas.</p>
+
+        <div class="space-y-4">
+          <div *ngFor="let h of horarios" class="p-4 rounded-xl border transition-all"
+               [ngClass]="h.activo ? 'border-blue-300 bg-blue-50' : 'border-gray-200 bg-gray-50'">
+            
+            <div class="flex items-center justify-between flex-wrap gap-4">
+              <!-- Switch de día -->
+              <label class="flex items-center space-x-3 cursor-pointer min-w-[120px]">
+                <div class="relative">
+                  <input type="checkbox" [(ngModel)]="h.activo" class="sr-only peer">
+                  <div class="w-10 h-6 bg-gray-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                </div>
+                <span class="font-bold whitespace-nowrap" [ngClass]="h.activo ? 'text-blue-900' : 'text-gray-500'">
+                  {{ getNombreDia(h.dia_semana) }}
+                </span>
+              </label>
+
+              <!-- Inputs de hora -->
+              <div *ngIf="h.activo" class="flex items-center space-x-2 flex-1 justify-end animate-fade-in">
+                <div class="relative">
+                  <input type="time" [(ngModel)]="h.hora_inicio" 
+                         class="px-3 py-1.5 border border-blue-200 rounded-lg text-sm font-bold text-gray-700 focus:ring-blue-500 focus:border-blue-500 bg-white cursor-pointer">
+                </div>
+                <span class="text-gray-400 font-medium">a</span>
+                <div class="relative">
+                  <input type="time" [(ngModel)]="h.hora_fin" 
+                         class="px-3 py-1.5 border border-blue-200 rounded-lg text-sm font-bold text-gray-700 focus:ring-blue-500 focus:border-blue-500 bg-white cursor-pointer">
+                </div>
+              </div>
+
+              <!-- Mensaje no disponible -->
+              <div *ngIf="!h.activo" class="flex-1 text-right text-sm text-gray-400 italic">
+                Cerrado
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-4 bg-gray-50 border-t border-gray-200 flex items-center justify-end space-x-3 rounded-b-xl">
+        <button (click)="cerrarModal()" class="px-4 py-2 font-bold text-gray-600 hover:text-gray-800 transition">
+          Cancelar
+        </button>
+        <button (click)="guardar()" [disabled]="cargando || guardando"
+                class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold shadow-sm transition disabled:opacity-75 disabled:cursor-not-allowed inline-flex items-center space-x-2">
+          <i *ngIf="guardando" class="fas fa-spinner fa-spin"></i>
+          <i *ngIf="!guardando" class="fas fa-save"></i>
+          <span>{{ guardando ? 'Guardando...' : 'Guardar Horario' }}</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>

@@ -7,6 +7,7 @@ import { SidebarComponent } from '../../componentes/aside/aside';
 import { WhatsappStatus } from '../../componentes/whatsapp-status/whatsapp-status';
 import { Pedidos, Pedido, Estadisticas } from '../../core/servicios/pedidos/pedidos';
 import { Autenticacion } from '../../core/servicios/autenticacion/autenticacion';
+import { API_URL } from '../../core/config/api.config';
 
 declare const Chart: any;
 
@@ -60,7 +61,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   private pedidosService = inject(Pedidos);
   private authService = inject(Autenticacion);
 
-  private readonly API_URL = 'http://localhost:3000/api';
+  private readonly API_URL = API_URL;
 
   empresaId: string = '';
   empresa: Empresa | null = null;
@@ -74,6 +75,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   vistaActual: string = 'dia';
 
   totalPedidos: number = 0;
+  ventasTotales: number = 0;
   promedioDiario: number = 0;
   diaMasPedidos: string = '-';
   tendencia: number = 0;
@@ -122,6 +124,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Carga los datos de la empresa y ejecuta las peticiones en paralelo de
+   * pedidos, estadisticas y datos para las graficas.
+   */
   async loadEmpresaData(): Promise<void> {
     try {
       this.isLoading = true;
@@ -132,16 +138,13 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         this.cargarDatosGrafica()
       ]);
 
-      // ✅ Leer tipo_negocio del JWT en lugar de hardcodear
       const usuarioJWT = this.authService.getUsuario();
-      const tipoNegocio = usuarioJWT?.empresa?.tipo_negocio;
-      const tipoLabel = tipoNegocio === 'productos' ? 'Productos' :
-                        tipoNegocio === 'servicios' ? 'Servicios' : 'Empresa';
+      const tipoNegocio = usuarioJWT?.empresa?.tipo_negocio || 'ambos';
 
       this.empresa = {
         id: this.empresaId,
         nombre: usuarioJWT?.empresa?.nombre || 'Mi Empresa',
-        tipo: tipoLabel,
+        tipo: tipoNegocio,
         modulos: {
           pedidos: true,
           reservas: true,
@@ -156,6 +159,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Obtiene los pedidos recientes de la empresa a traves del servicio.
+   * Transforma los pedidos devueltos para mostrarlos como actividad reciente.
+   */
   async cargarPedidos(): Promise<void> {
     try {
       this.pedidosService.obtenerPedidos(this.empresaId, undefined, true).subscribe({
@@ -169,7 +176,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         },
         error: () => { this.actividadReciente = []; }
       });
-    } catch (error) {}
+    } catch (error) { }
   }
 
   async cargarEstadisticas(): Promise<void> {
@@ -178,14 +185,19 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
         next: (response) => {
           if (response.success && response.data) {
             this.estadisticas = response.data;
-            this.totalPedidos = response.data.totales.total_pedidos;
+            this.totalPedidos = response.data.totales?.total_pedidos || 0;
+            this.ventasTotales = response.data.totales?.ventas_totales || 0;
           }
         },
-        error: () => {}
+        error: () => { }
       });
-    } catch (error) {}
+    } catch (error) { }
   }
 
+  /**
+   * Carga los datos historicos necesarios para construir la grafica.
+   * Procesa la informacion por dia, semana y mes para alimentar la vista correspondiente.
+   */
   async cargarDatosGrafica(): Promise<void> {
     try {
       this.pedidosService.obtenerPedidos(this.empresaId, undefined, true).subscribe({
@@ -211,9 +223,9 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
             }
           }
         },
-        error: () => {}
+        error: () => { }
       });
-    } catch (error) {}
+    } catch (error) { }
   }
 
   procesarDatosPorDia(pedidos: Pedido[]): { labels: string[], data: number[] } {
@@ -255,7 +267,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     const hoy = new Date();
     const labels: string[] = [];
     const data: number[] = [];
-    const meses = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
 
     for (let i = 11; i >= 0; i--) {
       const fecha = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
@@ -308,7 +320,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
           rol: usuarioJWT.rol || 'Administrador'
         };
       }
-    } catch (error) {}
+    } catch (error) { }
   }
 
   async verificarEstadoWhatsApp(): Promise<void> {
@@ -321,6 +333,10 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
     }
   }
 
+  /**
+   * Inicializa o reinicializa la grafica de pedidos utilizando la libreria Chart.js.
+   * Se invoca tras asegurar que el canvas del DOM este disponible.
+   */
   private initPedidosChart(): void {
     const canvas = document.getElementById('pedidosChart') as HTMLCanvasElement;
     if (!canvas) { setTimeout(() => this.initPedidosChart(), 200); return; }
@@ -412,6 +428,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   handleNavigation(route: string): void {
     this.currentView = route;
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.innerWidth < 1024) this.sidebarOpen = false;
     if (route === 'dashboard') setTimeout(() => this.initPedidosChart(), 100);
   }
 
@@ -423,6 +440,7 @@ export class DashboardComponent implements OnInit, AfterViewInit, OnDestroy {
   changeView(view: string): void {
     this.currentView = view;
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (window.innerWidth < 1024) this.sidebarOpen = false;
   }
 
   getViewTitle(): string {

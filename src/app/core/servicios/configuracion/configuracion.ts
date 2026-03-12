@@ -27,7 +27,7 @@ export interface RespuestaAutomatica {
   respuesta: string;
   tipo_respuesta: 'texto' | 'imagen' | 'documento' | 'enlace';
   fecha_creacion?: string;
-  // ❌ ELIMINADAS: activo y prioridad
+  //  ELIMINADAS: activo y prioridad
 }
 
 export interface CatalogoItem {
@@ -199,7 +199,7 @@ export class ChatbotService {
     ).pipe(catchError(this.handleError));
   }
 
-  // ❌ MÉTODO ELIMINADO: toggleRespuestaActiva (ya no existe el campo activo)
+  //  MÉTODO ELIMINADO: toggleRespuestaActiva (ya no existe el campo activo)
 
   // ============================================
   // CATÁLOGO - PRODUCTOS Y SERVICIOS (Rutas Públicas - Para N8N)
@@ -300,7 +300,7 @@ export class ChatbotService {
       }
     }
 
-    // ❌ ELIMINADA: validación de prioridad
+    //  ELIMINADA: validación de prioridad
 
     return {
       valido: errores.length === 0,
@@ -411,3 +411,5 @@ export class ChatbotService {
     }));
   }
 }
+
+

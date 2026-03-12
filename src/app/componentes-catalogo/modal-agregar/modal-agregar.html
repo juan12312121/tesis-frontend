@@ -3,9 +3,9 @@
      class="fixed inset-0 z-50 overflow-y-auto"
      (click)="cerrarModal()">
   <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-    <div class="fixed inset-0 transition-opacity bg-gray-900 bg-opacity-75"></div>
+    <div class="fixed inset-0 transition-opacity bg-gray-900/80 dark:bg-black/90 bg-opacity-75"></div>
 
-    <div class="inline-block align-bottom bg-white rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full max-h-[90vh] overflow-y-auto"
+    <div class="inline-block align-bottom bg-white dark:bg-slate-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full max-h-[90vh] overflow-y-auto"
          (click)="stopPropagation($event)">
 
       <!-- HEADER -->
@@ -22,14 +22,14 @@
       </div>
 
       <!-- ADVERTENCIA SI EL TIPO ESTÁ DESHABILITADO -->
-      <div *ngIf="!tipoActualHabilitado" class="bg-yellow-50 border-l-4 border-yellow-400 p-4 m-4">
+      <div *ngIf="!tipoActualHabilitado" class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 dark:border-yellow-600 p-4 m-4">
         <div class="flex">
           <div class="flex-shrink-0">
-            <i class="fas fa-exclamation-triangle text-yellow-400 text-xl"></i>
+            <i class="fas fa-exclamation-triangle text-yellow-500 dark:text-yellow-400 text-xl"></i>
           </div>
           <div class="ml-3">
-            <p class="text-sm font-bold text-yellow-800">⚠️ Tipo de item deshabilitado</p>
-            <p class="text-xs text-yellow-700 mt-1">
+            <p class="text-sm font-bold text-yellow-800 dark:text-yellow-200">⚠️ Tipo de item deshabilitado</p>
+            <p class="text-xs text-yellow-700 dark:text-yellow-400 mt-1">
               Los <strong>{{ itemActual.tipo_item === 'producto' ? 'productos' : 'servicios' }}</strong> están deshabilitados en tu configuración.
               Este item no será visible en el catálogo público hasta que habilites este tipo.
             </p>
@@ -43,7 +43,7 @@
 
           <!-- Nombre -->
           <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">
+            <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">
               Nombre <span class="text-red-500">*</span>
             </label>
             <input
@@ -53,27 +53,27 @@
               required
               maxlength="255"
               placeholder="Nombre del item"
-              class="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-sm sm:text-base"
+              class="w-full px-4 py-2 sm:py-3 bg-white dark:bg-slate-700 border-2 border-gray-300 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-gray-900 dark:text-slate-50 text-sm sm:text-base"
             >
           </div>
 
           <!-- Descripción -->
           <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">Descripción</label>
+            <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">Descripción</label>
             <textarea
               [(ngModel)]="itemActual.descripcion"
               name="descripcion"
               rows="4"
               placeholder="Descripción detallada..."
-              class="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium resize-none text-sm sm:text-base"
+              class="w-full px-4 py-2 sm:py-3 bg-white dark:bg-slate-700 border-2 border-gray-300 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium resize-none text-gray-900 dark:text-slate-50 text-sm sm:text-base"
             ></textarea>
           </div>
 
           <!-- Precio -->
           <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">Precio (MXN)</label>
+            <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">Precio (MXN)</label>
             <div class="relative">
-              <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 font-bold">$</span>
+              <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 dark:text-slate-400 font-bold">$</span>
               <input
                 type="number"
                 [(ngModel)]="itemActual.precio"
@@ -81,37 +81,37 @@
                 min="0"
                 step="0.01"
                 placeholder="0.00"
-                class="w-full pl-8 pr-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-sm sm:text-base"
+                class="w-full pl-8 pr-4 py-2 sm:py-3 bg-white dark:bg-slate-700 border-2 border-gray-300 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-gray-900 dark:text-slate-50 text-sm sm:text-base"
               >
             </div>
-            <p class="mt-1 text-xs text-gray-500">Opcional - Dejar vacío si no aplica</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">Opcional - Dejar vacío si no aplica</p>
           </div>
 
           <!-- CAMPOS ESPECÍFICOS PARA PRODUCTOS -->
-          <div *ngIf="itemActual.tipo_item === 'producto'" class="space-y-4 p-4 bg-green-50 rounded-lg border-2 border-green-200">
-            <h4 class="text-sm font-black text-green-800 flex items-center space-x-2">
+          <div *ngIf="itemActual.tipo_item === 'producto'" class="space-y-4 p-4 bg-green-50 dark:bg-green-900/10 rounded-lg border-2 border-green-200 dark:border-green-900/30 transition-colors">
+            <h4 class="text-sm font-black text-green-800 dark:text-green-300 flex items-center space-x-2">
               <i class="fas fa-box"></i>
               <span>Información del Producto</span>
             </h4>
-
+  
             <!-- Stock -->
             <div>
-              <label class="block text-sm font-bold text-gray-700 mb-2">Stock Disponible</label>
+              <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">Stock Disponible</label>
               <input
                 type="number"
                 [(ngModel)]="itemActual.stock"
                 name="stock"
                 min="0"
                 placeholder="0"
-                class="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-sm sm:text-base"
+                class="w-full px-4 py-2 sm:py-3 bg-white dark:bg-slate-700 border-2 border-gray-300 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-gray-900 dark:text-slate-50 text-sm sm:text-base"
               >
-              <p class="mt-1 text-xs text-gray-500">Cantidad en inventario</p>
+              <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">Cantidad en inventario</p>
             </div>
           </div>
 
           <!-- CAMPOS ESPECÍFICOS PARA SERVICIOS -->
-          <div *ngIf="itemActual.tipo_item === 'servicio'" class="space-y-4 p-4 bg-purple-50 rounded-lg border-2 border-purple-200">
-            <h4 class="text-sm font-black text-purple-800 flex items-center space-x-2">
+          <div *ngIf="itemActual.tipo_item === 'servicio'" class="space-y-4 p-4 bg-purple-50 dark:bg-purple-900/10 rounded-lg border-2 border-purple-200 dark:border-purple-900/30 transition-colors">
+            <h4 class="text-sm font-black text-purple-800 dark:text-purple-300 flex items-center space-x-2">
               <i class="fas fa-tools"></i>
               <span>Información del Servicio</span>
             </h4>
@@ -119,32 +119,32 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <!-- Duración -->
               <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">Duración (minutos)</label>
+                <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">Duración (minutos)</label>
                 <input
                   type="number"
                   [(ngModel)]="itemActual.duracion_minutos"
                   name="duracion"
                   min="1"
                   placeholder="30"
-                  class="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-sm sm:text-base"
+                  class="w-full px-4 py-2 sm:py-3 bg-white dark:bg-slate-700 border-2 border-gray-300 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-gray-900 dark:text-slate-50 text-sm sm:text-base"
                 >
-                <p class="mt-1 text-xs text-gray-500">Tiempo estimado del servicio</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">Tiempo estimado del servicio</p>
               </div>
 
               <!-- Requiere Agendamiento -->
               <div>
-                <label class="block text-sm font-bold text-gray-700 mb-2">¿Requiere agendamiento?</label>
+                <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">¿Requiere agendamiento?</label>
                 <div class="flex items-center space-x-4 mt-3">
                   <label class="flex items-center space-x-2 cursor-pointer">
-                    <input type="radio" [(ngModel)]="itemActual.requiere_agendamiento" name="agendamiento" [value]="true" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
-                    <span class="text-sm font-medium text-gray-700">Sí</span>
+                    <input type="radio" [(ngModel)]="itemActual.requiere_agendamiento" name="agendamiento" [value]="true" class="w-4 h-4 text-purple-600 dark:text-purple-400 focus:ring-purple-500">
+                    <span class="text-sm font-medium text-gray-700 dark:text-slate-300">Sí</span>
                   </label>
                   <label class="flex items-center space-x-2 cursor-pointer">
-                    <input type="radio" [(ngModel)]="itemActual.requiere_agendamiento" name="agendamiento" [value]="false" class="w-4 h-4 text-purple-600 focus:ring-purple-500">
-                    <span class="text-sm font-medium text-gray-700">No</span>
+                    <input type="radio" [(ngModel)]="itemActual.requiere_agendamiento" name="agendamiento" [value]="false" class="w-4 h-4 text-purple-600 dark:text-purple-400 focus:ring-purple-500">
+                    <span class="text-sm font-medium text-gray-700 dark:text-slate-300">No</span>
                   </label>
                 </div>
-                <p class="mt-1 text-xs text-gray-500">Si requiere cita previa</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">Si requiere cita previa</p>
               </div>
             </div>
           </div>
@@ -167,31 +167,31 @@
 
           <!-- Tags -->
           <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">Etiquetas</label>
+            <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">Etiquetas</label>
             <input
               type="text"
               [(ngModel)]="itemActual.tags"
               name="tags"
               placeholder="Ej: popular, oferta, nuevo"
-              class="w-full px-4 py-2 sm:py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-sm sm:text-base"
+              class="w-full px-4 py-2 sm:py-3 bg-white dark:bg-slate-700 text-gray-900 dark:text-slate-50 border-2 border-gray-300 dark:border-slate-600 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition font-medium text-sm sm:text-base"
             >
-            <p class="mt-1 text-xs text-gray-500">Separa las etiquetas con comas</p>
+            <p class="mt-1 text-xs text-gray-500 dark:text-slate-400">Separa las etiquetas con comas</p>
           </div>
 
           <!-- Disponibilidad -->
           <div class="flex items-center space-x-3">
             <label class="relative inline-flex items-center cursor-pointer">
               <input type="checkbox" [(ngModel)]="itemActual.disponible" name="disponible" class="sr-only peer">
-              <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+              <div class="w-11 h-6 bg-gray-300 dark:bg-slate-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 dark:after:border-slate-500 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
             </label>
-            <span class="text-sm font-bold text-gray-700">
+            <span class="text-sm font-bold text-gray-700 dark:text-slate-300">
               {{ itemActual.disponible ? 'Disponible' : 'No disponible' }}
             </span>
           </div>
 
           <!-- Imagen -->
           <div>
-            <label class="block text-sm font-bold text-gray-700 mb-2">Imagen</label>
+            <label class="block text-sm font-bold text-gray-700 dark:text-slate-300 mb-2">Imagen</label>
 
             <div *ngIf="itemActual.imagen_url && !imagenPreview" class="mb-3">
               <div class="relative inline-block">
@@ -213,13 +213,13 @@
               <p class="text-xs text-green-600 mt-1">✓ Nueva imagen seleccionada</p>
             </div>
 
-            <div *ngIf="!itemActual.imagen_url || imagenPreview" class="border-2 border-dashed border-gray-300 rounded-lg p-4 sm:p-6 text-center hover:border-blue-400 transition">
+            <div *ngIf="!itemActual.imagen_url || imagenPreview" class="border-2 border-dashed border-gray-300 dark:border-slate-600 rounded-lg p-4 sm:p-6 text-center hover:border-blue-400 dark:hover:border-blue-500 transition-colors bg-gray-50 dark:bg-slate-900/40">
               <input type="file" #fileInput (change)="onFileSelected($event)" accept="image/jpeg,image/jpg,image/png,image/gif,image/webp" class="hidden" id="file-input">
               <label for="file-input" class="cursor-pointer">
                 <div class="flex flex-col items-center space-y-2">
-                  <i class="fas fa-cloud-upload-alt text-3xl sm:text-4xl text-gray-400"></i>
-                  <p class="text-xs sm:text-sm font-semibold text-gray-700">Click para seleccionar imagen</p>
-                  <p class="text-xs text-gray-500">JPG, PNG, GIF o WEBP (máx. 5MB)</p>
+                  <i class="fas fa-cloud-upload-alt text-3xl sm:text-4xl text-gray-400 dark:text-slate-500"></i>
+                  <p class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-slate-300">Click para seleccionar imagen</p>
+                  <p class="text-xs text-gray-500 dark:text-slate-400">JPG, PNG, GIF o WEBP (máx. 5MB)</p>
                 </div>
               </label>
             </div>
@@ -233,8 +233,8 @@
         </div>
 
         <!-- BOTONES -->
-        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mt-6 pt-6 border-t border-gray-200">
-          <button type="button" (click)="cerrarModal()" class="flex-1 bg-gray-200 text-gray-700 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 transition">
+        <div class="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-3 mt-6 pt-6 border-t border-gray-200 dark:border-slate-700 transition-colors">
+          <button type="button" (click)="cerrarModal()" class="flex-1 bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-slate-200 font-bold py-3 px-6 rounded-lg hover:bg-gray-300 dark:hover:bg-slate-600 transition">
             Cancelar
           </button>
           <button

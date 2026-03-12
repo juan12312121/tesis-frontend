@@ -1,12 +1,12 @@
 <!-- Header con botón -->
-<div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+<div class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 p-6 mb-6 transition-colors">
   <div class="flex items-center justify-between">
     <div>
-      <h3 class="text-lg font-black text-gray-900 flex items-center">
-        <i class="fas fa-cog text-blue-600 mr-2"></i>
+      <h3 class="text-lg font-black text-gray-900 dark:text-slate-50 flex items-center">
+        <i class="fas fa-cog text-blue-600 dark:text-blue-400 mr-2"></i>
         Configuración de Horarios y Mensajes
       </h3>
-      <p class="text-sm text-gray-600 mt-1">Visualiza y edita la configuración de tu chatbot</p>
+      <p class="text-sm text-gray-600 dark:text-slate-400 mt-1">Visualiza y edita la configuración de tu chatbot</p>
     </div>
     <button (click)="hasConfiguration ? onEditarClick() : onCrearClick()"
       class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-6 rounded-lg hover:shadow-lg transition flex items-center space-x-2">
@@ -17,7 +17,7 @@
 </div>
 
 <!-- TABLA DE CONFIGURACIÓN -->
-<div *ngIf="hasConfiguration" class="bg-white rounded-xl shadow-lg border border-gray-200 overflow-hidden">
+<div *ngIf="hasConfiguration" class="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-gray-200 dark:border-slate-700 overflow-hidden transition-colors">
   <div class="overflow-x-auto">
     <table class="w-full">
       <!-- Header de la tabla -->
@@ -34,24 +34,24 @@
         </tr>
       </thead>
 
-      <tbody class="divide-y divide-gray-200">
+      <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
         <!-- Mensaje de Bienvenida -->
-        <tr class="hover:bg-blue-50 transition">
-          <td class="px-6 py-4 bg-gray-50">
+        <tr class="hover:bg-blue-50 dark:hover:bg-slate-700/50 transition-colors">
+          <td class="px-6 py-4 bg-gray-50 dark:bg-slate-900/50">
             <div class="flex items-center">
-              <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                <i class="fas fa-comment-dots text-blue-600 text-xl"></i>
+              <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mr-4">
+                <i class="fas fa-comment-dots text-blue-600 dark:text-blue-400 text-xl"></i>
               </div>
               <div>
-                <p class="font-black text-gray-900">Mensaje de Bienvenida</p>
-                <p class="text-xs text-gray-500">Se envía dentro del horario</p>
+                <p class="font-black text-gray-900 dark:text-slate-50">Mensaje de Bienvenida</p>
+                <p class="text-xs text-gray-500 dark:text-slate-400">Se envía dentro del horario</p>
               </div>
             </div>
           </td>
           <td class="px-6 py-4">
-            <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-600 rounded-lg p-4">
-              <p class="text-gray-800 whitespace-pre-wrap">{{ configuracion.mensaje_bienvenida || 'No configurado' }}</p>
-              <p class="text-xs text-gray-500 mt-2">
+            <div class="bg-gradient-to-r from-blue-50 to-blue-100 dark:from-blue-900/20 dark:to-blue-800/20 border-l-4 border-blue-600 dark:border-blue-500 rounded-lg p-4">
+              <p class="text-gray-800 dark:text-slate-200 whitespace-pre-wrap">{{ configuracion.mensaje_bienvenida || 'No configurado' }}</p>
+              <p class="text-xs text-gray-500 dark:text-slate-400 mt-2">
                 <i class="fas fa-text-width mr-1"></i>
                 {{ configuracion.mensaje_bienvenida?.length || 0 }} caracteres
               </p>
@@ -60,22 +60,22 @@
         </tr>
 
         <!-- Mensaje Fuera de Horario -->
-        <tr class="hover:bg-purple-50 transition">
-          <td class="px-6 py-4 bg-gray-50">
+        <tr class="hover:bg-purple-50 dark:hover:bg-slate-700/50 transition-colors">
+          <td class="px-6 py-4 bg-gray-50 dark:bg-slate-900/50">
             <div class="flex items-center">
-              <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mr-4">
-                <i class="fas fa-moon text-purple-600 text-xl"></i>
+              <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mr-4">
+                <i class="fas fa-moon text-purple-600 dark:text-purple-400 text-xl"></i>
               </div>
               <div>
-                <p class="font-black text-gray-900">Mensaje Fuera de Horario</p>
-                <p class="text-xs text-gray-500">Se envía fuera del horario</p>
+                <p class="font-black text-gray-900 dark:text-slate-50">Mensaje Fuera de Horario</p>
+                <p class="text-xs text-gray-500 dark:text-slate-400">Se envía fuera del horario</p>
               </div>
             </div>
           </td>
           <td class="px-6 py-4">
-            <div class="bg-gradient-to-r from-purple-50 to-purple-100 border-l-4 border-purple-600 rounded-lg p-4">
-              <p class="text-gray-800 whitespace-pre-wrap">{{ configuracion.mensaje_fuera_horario || 'No configurado' }}</p>
-              <p class="text-xs text-gray-500 mt-2">
+            <div class="bg-gradient-to-r from-purple-50 to-purple-100 dark:from-purple-900/20 dark:to-purple-800/20 border-l-4 border-purple-600 dark:border-purple-500 rounded-lg p-4">
+              <p class="text-gray-800 dark:text-slate-200 whitespace-pre-wrap">{{ configuracion.mensaje_fuera_horario || 'No configurado' }}</p>
+              <p class="text-xs text-gray-500 dark:text-slate-400 mt-2">
                 <i class="fas fa-text-width mr-1"></i>
                 {{ configuracion.mensaje_fuera_horario?.length || 0 }} caracteres
               </p>
@@ -84,42 +84,42 @@
         </tr>
 
         <!-- Horario de Atención -->
-        <tr class="hover:bg-green-50 transition">
-          <td class="px-6 py-4 bg-gray-50">
+        <tr class="hover:bg-green-50 dark:hover:bg-slate-700/50 transition-colors">
+          <td class="px-6 py-4 bg-gray-50 dark:bg-slate-900/50">
             <div class="flex items-center">
-              <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mr-4">
-                <i class="fas fa-clock text-green-600 text-xl"></i>
+              <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mr-4">
+                <i class="fas fa-clock text-green-600 dark:text-green-400 text-xl"></i>
               </div>
               <div>
-                <p class="font-black text-gray-900">Horario de Atención</p>
-                <p class="text-xs text-gray-500">Horario laboral del negocio</p>
+                <p class="font-black text-gray-900 dark:text-slate-50">Horario de Atención</p>
+                <p class="text-xs text-gray-500 dark:text-slate-400">Horario laboral del negocio</p>
               </div>
             </div>
           </td>
           <td class="px-6 py-4">
             <div class="flex items-center space-x-4">
-              <div class="bg-green-100 border-2 border-green-600 rounded-lg px-6 py-3 text-center">
-                <p class="text-xs text-green-700 font-semibold mb-1">INICIO</p>
-                <p class="text-2xl font-black text-green-800">{{ configuracion.horario_inicio }}</p>
+              <div class="bg-green-100 dark:bg-green-900/20 border-2 border-green-600 dark:border-green-500 rounded-lg px-6 py-3 text-center">
+                <p class="text-xs text-green-700 dark:text-green-400 font-semibold mb-1">INICIO</p>
+                <p class="text-2xl font-black text-green-800 dark:text-green-100">{{ configuracion.horario_inicio }}</p>
               </div>
-              <i class="fas fa-arrow-right text-2xl text-gray-400"></i>
-              <div class="bg-green-100 border-2 border-green-600 rounded-lg px-6 py-3 text-center">
-                <p class="text-xs text-green-700 font-semibold mb-1">FIN</p>
-                <p class="text-2xl font-black text-green-800">{{ configuracion.horario_fin }}</p>
+              <i class="fas fa-arrow-right text-2xl text-gray-400 dark:text-slate-600"></i>
+              <div class="bg-green-100 dark:bg-green-900/20 border-2 border-green-600 dark:border-green-500 rounded-lg px-6 py-3 text-center">
+                <p class="text-xs text-green-700 dark:text-green-400 font-semibold mb-1">FIN</p>
+                <p class="text-2xl font-black text-green-800 dark:text-green-100">{{ configuracion.horario_fin }}</p>
               </div>
             </div>
           </td>
         </tr>
 
         <!-- Días Laborales -->
-        <tr class="hover:bg-orange-50 transition">
-          <td class="px-6 py-4 bg-gray-50">
+        <tr class="hover:bg-orange-50 dark:hover:bg-slate-700/50 transition-colors">
+          <td class="px-6 py-4 bg-gray-50 dark:bg-slate-900/50">
             <div class="flex items-center">
-              <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center mr-4">
-                <i class="fas fa-calendar-week text-orange-600 text-xl"></i>
+              <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center mr-4">
+                <i class="fas fa-calendar-week text-orange-600 dark:text-orange-400 text-xl"></i>
               </div>
               <div>
-                <p class="font-black text-gray-900">Días Laborales</p>
+                <p class="font-black text-gray-900 dark:text-slate-50">Días Laborales</p>
                 <p class="text-xs text-gray-500">Días de atención</p>
               </div>
             </div>
@@ -127,13 +127,13 @@
           <td class="px-6 py-4">
             <div class="grid grid-cols-7 gap-3">
               <div *ngFor="let dia of diasSemana"
-                   [ngClass]="dia.activo ? 'bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg scale-105' : 'bg-gray-200 text-gray-400'"
+                   [ngClass]="dia.activo ? 'bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-lg scale-105' : 'bg-gray-200 dark:bg-slate-700 text-gray-400 dark:text-slate-400'"
                    class="rounded-lg p-3 text-center transition-all transform">
                 <i class="fas" [ngClass]="dia.activo ? 'fa-check-circle' : 'fa-times-circle'" class="text-2xl mb-1"></i>
                 <p class="text-xs font-bold">{{ dia.nombre.substring(0, 3) }}</p>
               </div>
             </div>
-            <p class="text-sm text-gray-600 mt-3" *ngIf="getDiasLaboralesTexto()">
+            <p class="text-sm text-gray-600 dark:text-slate-400 mt-3" *ngIf="getDiasLaboralesTexto()">
               <i class="fas fa-info-circle mr-1"></i>
               <strong>Días activos:</strong> {{ getDiasLaboralesTexto() }}
             </p>
@@ -144,9 +144,9 @@
   </div>
 
   <!-- Footer con botón eliminar -->
-  <div class="bg-gray-50 border-t border-gray-200 px-6 py-4 flex justify-end">
+  <div class="bg-gray-50 dark:bg-slate-900/50 border-t border-gray-200 dark:border-slate-700 px-6 py-4 flex justify-end">
     <button (click)="onEliminarClick()" [disabled]="isSaving"
-      class="bg-white border-2 border-red-600 text-red-600 font-bold py-2 px-5 rounded-lg hover:bg-red-50 transition disabled:opacity-50 flex items-center space-x-2">
+      class="bg-white dark:bg-slate-800 border-2 border-red-600 dark:border-red-500 text-red-600 dark:text-red-400 font-bold py-2 px-5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition disabled:opacity-50 flex items-center space-x-2">
       <i class="fas fa-trash"></i>
       <span>Eliminar Configuración</span>
     </button>
@@ -154,12 +154,12 @@
 </div>
 
 <!-- Empty State -->
-<div *ngIf="!hasConfiguration" class="bg-white rounded-xl shadow-sm border-2 border-dashed border-gray-300 p-12 text-center">
-  <div class="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-    <i class="fas fa-cog text-gray-400 text-4xl"></i>
+<div *ngIf="!hasConfiguration" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border-2 border-dashed border-gray-300 dark:border-slate-700 p-12 text-center">
+  <div class="w-24 h-24 bg-gray-100 dark:bg-slate-700 rounded-full flex items-center justify-center mx-auto mb-4">
+    <i class="fas fa-cog text-gray-400 dark:text-slate-500 text-4xl"></i>
   </div>
-  <h3 class="text-2xl font-black text-gray-900 mb-2">No hay configuración</h3>
-  <p class="text-gray-600 mb-6">Crea tu primera configuración de horarios y mensajes para comenzar</p>
+  <h3 class="text-2xl font-black text-gray-900 dark:text-slate-50 mb-2">No hay configuración</h3>
+  <p class="text-gray-600 dark:text-slate-400 mb-6">Crea tu primera configuración de horarios y mensajes para comenzar</p>
   <button (click)="onCrearClick()"
     class="bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-bold py-3 px-8 rounded-lg hover:shadow-lg transition inline-flex items-center space-x-2">
     <i class="fas fa-plus"></i>

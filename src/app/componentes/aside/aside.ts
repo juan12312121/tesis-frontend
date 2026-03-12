@@ -42,6 +42,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   @Output() navigate = new EventEmitter<string>();
   @Output() logout = new EventEmitter<void>();
+  @Output() toggleSidebarEvent = new EventEmitter<void>();
 
   isDarkMode: boolean = false;
   private themeSubscription?: Subscription;
@@ -94,6 +95,7 @@ export class SidebarComponent implements OnInit, OnDestroy {
       'dashboard': `/dashboard/${this.empresa.id}`,
       'mensajes': `/${this.empresa.id}/mensajes`,
       'catalogo': `/${this.empresa.id}/catalogos`,
+      'catalogo-servicios': `/${this.empresa.id}/catalogo-servicios`,
       'pedidos': `/${this.empresa.id}/pedidos`,
       'reservas': `/${this.empresa.id}/reservas`,
       'chatbot': `/${this.empresa.id}/configuracion-bot`

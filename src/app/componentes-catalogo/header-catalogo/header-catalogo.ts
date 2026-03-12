@@ -19,7 +19,7 @@ export class HeaderCatalogo {
   @Input() filtroDisponible: 'todos' | 'disponible' | 'no_disponible' = 'todos';
   @Input() ordenamiento: 'nombre' | 'precio' | 'fecha' | 'categoria' = 'fecha';
 
-  // ✅ CORREGIDO: Categoria[] en lugar de string[]
+  //  CORREGIDO: Categoria[] en lugar de string[]
   @Input() categoriasDisponibles: Categoria[] = [];
 
   @Input() sidebarOpen = true;
@@ -36,7 +36,7 @@ export class HeaderCatalogo {
   @Output() cambiarFiltroDisponibleEvent = new EventEmitter<'todos' | 'disponible' | 'no_disponible'>();
   @Output() cambiarOrdenamientoEvent = new EventEmitter<'nombre' | 'precio' | 'fecha' | 'categoria'>();
   @Output() terminoBusquedaChange = new EventEmitter<string>();
-  // ✅ NUEVO: evento para abrir modal de categorías
+  //  NUEVO: evento para abrir modal de categorías
   @Output() gestionarCategoriasEvent = new EventEmitter<void>();
 
   constructor(private router: Router) {}

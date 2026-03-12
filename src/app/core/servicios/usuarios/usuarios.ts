@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Autenticacion } from '../autenticacion/autenticacion';
+import { API_URL } from '../../config/api.config';
 
 interface Usuario {
   id: string;
@@ -29,7 +30,7 @@ interface CambiarPasswordData {
   providedIn: 'root',
 })
 export class Usuarios {
-  private readonly API_URL = 'http://localhost:3000/api';
+  private readonly API_URL = API_URL;
 
   constructor(
     private http: HttpClient,
@@ -152,7 +153,7 @@ export class Usuarios {
   const nombreUsuario = nombre || this.auth.getUsuario()?.nombre || 'Usuario';
   return nombreUsuario
     .split(' ')
-    .map((word: string) => word[0])  // 👈 Agrega el tipo aquí
+    .map((word: string) => word[0])  //  Agrega el tipo aquí
     .join('')
     .substring(0, 2)
     .toUpperCase();

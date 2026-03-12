@@ -1,9 +1,9 @@
 <!-- grid-catalogo.html - VERSIÓN TABLA -->
 
 <!-- Contador de resultados -->
-<div *ngIf="itemsFiltrados.length > 0" class="mb-4 flex items-center justify-between flex-wrap gap-2">
-  <p class="text-sm text-gray-600 font-medium">
-    Mostrando <span class="font-bold text-gray-900">{{ rangoItems }}</span> items
+<div *ngIf="itemsFiltrados.length > 0" class="mb-4 flex items-center justify-between flex-wrap gap-2 transition-colors">
+  <p class="text-sm text-gray-600 dark:text-slate-400 font-medium">
+    Mostrando <span class="font-bold text-gray-900 dark:text-slate-50">{{ rangoItems }}</span> items
   </p>
   <p class="text-sm text-gray-500">
     Página {{ paginaActual }} de {{ totalPaginas }}
@@ -11,27 +11,27 @@
 </div>
 
 <!-- Tabla de Items -->
-<div *ngIf="itemsVisibles.length > 0" class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+<div *ngIf="itemsVisibles.length > 0" class="bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 overflow-hidden transition-colors">
   <div class="overflow-x-auto">
     <table class="w-full">
-      <thead class="bg-gray-50 border-b border-gray-200">
+      <thead class="bg-gray-50 dark:bg-slate-700 border-b border-gray-200 dark:border-slate-600 transition-colors">
         <tr>
-          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Imagen</th>
-          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Nombre</th>
-          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Categoría</th>
-          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">Precio</th>
-          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider hidden md:table-cell">Stock</th>
-          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider hidden lg:table-cell">Estado</th>
-          <th class="px-4 py-3 text-right text-xs font-bold text-gray-700 uppercase tracking-wider">Acciones</th>
+          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Imagen</th>
+          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Nombre</th>
+          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Categoría</th>
+          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Precio</th>
+          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider hidden md:table-cell">Stock</th>
+          <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider hidden lg:table-cell">Estado</th>
+          <th class="px-4 py-3 text-right text-xs font-bold text-gray-700 dark:text-slate-300 uppercase tracking-wider">Acciones</th>
         </tr>
       </thead>
 
-      <tbody class="divide-y divide-gray-200">
-        <tr *ngFor="let item of itemsVisibles" class="hover:bg-gray-50 transition">
+      <tbody class="divide-y divide-gray-200 dark:divide-slate-700">
+        <tr *ngFor="let item of itemsVisibles" class="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
 
           <!-- Imagen -->
           <td class="px-4 py-3">
-            <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 rounded-lg overflow-hidden flex items-center justify-center">
+            <div class="w-16 h-16 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-slate-700 dark:to-slate-800 rounded-lg overflow-hidden flex items-center justify-center">
               <img *ngIf="item.imagen_url" [src]="item.imagen_url" [alt]="item.nombre_item" class="w-full h-full object-cover">
               <i *ngIf="!item.imagen_url" class="fas fa-image text-gray-400 text-2xl"></i>
             </div>
@@ -40,8 +40,8 @@
           <!-- Nombre y Descripción -->
           <td class="px-4 py-3">
             <div class="max-w-xs">
-              <p class="font-bold text-gray-900 text-sm mb-1">{{ item.nombre_item }}</p>
-              <p class="text-xs text-gray-600 line-clamp-2">{{ item.descripcion || 'Sin descripción' }}</p>
+              <p class="font-bold text-gray-900 dark:text-slate-50 text-sm mb-1">{{ item.nombre_item }}</p>
+              <p class="text-xs text-gray-600 dark:text-slate-400 line-clamp-2">{{ item.descripcion || 'Sin descripción' }}</p>
             </div>
           </td>
 
@@ -86,6 +86,11 @@
           <!-- Acciones -->
           <td class="px-4 py-3 text-right">
             <div class="flex items-center justify-end space-x-2">
+              <button *ngIf="serviciosHabilitados && ($any(item).duracion_minutos || $any(item).tipo_item === 'servicio')" 
+                      (click)="configurarHorarios(item)" 
+                      class="p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition" title="Configurar Horarios">
+                <i class="far fa-calendar-alt text-sm"></i>
+              </button>
               <button (click)="editarItem(item)" class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition" title="Editar">
                 <i class="fas fa-edit text-sm"></i>
               </button>

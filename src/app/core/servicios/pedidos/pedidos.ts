@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Autenticacion } from '../autenticacion/autenticacion';
+import { API_URL, API_BASE_URL } from '../../config/api.config';
 
 export interface ItemPedido {
   producto_id?: number;
@@ -55,20 +56,25 @@ export interface ApiResponse<T> {
   providedIn: 'root'
 })
 export class Pedidos {
-  private apiUrl = 'http://localhost:3000/api/pedidos';
+  private apiUrl = `${API_URL}/pedidos`;
 
   constructor(
     private http: HttpClient,
     private authService: Autenticacion
   ) {
-    console.log('🔧 Servicio de Pedidos inicializado');
-    console.log('📍 API URL:', this.apiUrl);
+    console.log(' Servicio de Pedidos inicializado');
+    console.log(' API URL:', this.apiUrl);
   }
 
   // ==================== OBTENER PEDIDOS ====================
 
   /**
-   * Obtener todos los pedidos de una empresa
+   * Obtiene la lista completa de pedidos asociados a una empresa especifica.
+   * Permite filtrar por estado y opcionalmente incluir pedidos sin informacion de contacto.
+   * @param empresaId Identificador unico de la empresa (string o number).
+   * @param estado (Opcional) Filtra los pedidos por su estado actual (ej: pendiente, en_proceso).
+   * @param incluirSinNombre (Opcional) Especifica si se deben incluir pedidos que no tienen nombre de cliente.
+   * @returns Un Observable que emite la respuesta con la lista de pedidos.
    */
   obtenerPedidos(
     empresaId: string | number,
@@ -83,7 +89,7 @@ export class Pedidos {
       params = params.set('incluirSinNombre', 'true');
     }
 
-    console.log('📋 GET pedidos:', { empresaId, estado, incluirSinNombre });
+    console.log(' GET pedidos:', { empresaId, estado, incluirSinNombre });
     return this.http.get<ApiResponse<Pedido[]>>(
       `${this.apiUrl}/empresa/${empresaId}`,
       { params }
@@ -94,7 +100,7 @@ export class Pedidos {
    * Obtener detalle de un pedido específico
    */
   obtenerDetallePedido(pedidoId: number): Observable<ApiResponse<Pedido>> {
-    console.log('📄 GET detalle pedido:', pedidoId);
+    console.log(' GET detalle pedido:', pedidoId);
     return this.http.get<ApiResponse<Pedido>>(
       `${this.apiUrl}/detalle/${pedidoId}`
     );
@@ -104,7 +110,7 @@ export class Pedidos {
    * Obtener estadísticas de pedidos
    */
   obtenerEstadisticas(empresaId: string | number): Observable<ApiResponse<Estadisticas>> {
-    console.log('📊 GET estadísticas:', empresaId);
+    console.log(' GET estadísticas:', empresaId);
     return this.http.get<ApiResponse<Estadisticas>>(
       `${this.apiUrl}/estadisticas/${empresaId}`
     );
@@ -113,25 +119,30 @@ export class Pedidos {
   // ==================== ACTUALIZAR ESTADO ====================
 
   /**
-   * Actualizar el estado de un pedido
+   * Actualiza el estado de seguimiento de un pedido especifico.
+   * @param pedidoId El identificador unico del pedido a modificar.
+   * @param nuevoEstado El nuevo estado a asignar al pedido.
+   * @returns Observable con la respuesta del servidor despues de actualizar el estado.
    */
   actualizarEstado(pedidoId: number, nuevoEstado: Pedido['estado']): Observable<ApiResponse<Pedido>> {
-    console.log('🔄 PUT actualizar estado:', { pedidoId, nuevoEstado });
+    console.log(' PUT actualizar estado:', { pedidoId, nuevoEstado });
     return this.http.put<ApiResponse<Pedido>>(
       `${this.apiUrl}/actualizar-estado/${pedidoId}`,
       { estado: nuevoEstado }
     );
   }
 
-  // ==================== ENVIAR MENSAJE WHATSAPP 🔥 ====================
+  // ==================== ENVIAR MENSAJE WHATSAPP  ====================
 
   /**
-   * Enviar mensaje de WhatsApp a un cliente
-   * @param empresaId ID de la empresa
-   * @param nombreSesion Nombre de la sesión WhatsApp
-   * @param jidWhatsapp JID del cliente (ej: 52064214372462@lid)
-   * @param mensaje Mensaje a enviar
-   * @returns Observable con la respuesta del servidor
+   * Envia un mensaje de notificacion a traves de WhatsApp al cliente.
+   * Esta funcion se utiliza para notificar al cliente sobre el estado de su pedido u otra informacion relevante.
+   * Requiere el token de autenticacion en los encabezados.
+   * @param empresaId ID de la empresa que envia el mensaje
+   * @param nombreSesion Nombre de la sesion activa de WhatsApp asociada a la empresa
+   * @param jidWhatsapp Identificador de WhatsApp del cliente destino
+   * @param mensaje El contenido de texto del mensaje a enviar
+   * @returns Observable con la respuesta de la API externa de envio
    */
   enviarMensajeCliente(
     empresaId: string,
@@ -139,7 +150,7 @@ export class Pedidos {
     jidWhatsapp: string,
     mensaje: string
   ): Observable<any> {
-    console.log('📤 Servicio: Enviando mensaje a cliente');
+    console.log(' Servicio: Enviando mensaje a cliente');
     console.log('   ├─ empresaId:', empresaId);
     console.log('   ├─ nombreSesion:', nombreSesion);
     console.log('   ├─ jidWhatsapp:', jidWhatsapp);
@@ -152,20 +163,20 @@ export class Pedidos {
       mensaje
     };
 
-    console.log('📦 Payload:', JSON.stringify(payload, null, 2));
+    console.log(' Payload:', JSON.stringify(payload, null, 2));
 
-    // 🔥 AGREGAR TOKEN AQUÍ
+    //  AGREGAR TOKEN AQUÍ
     const token = this.authService.getToken();
-    console.log('🔐 Token obtenido:', token ? '✅ Sí' : '❌ No');
+    console.log(' Token obtenido:', token ? ' Sí' : ' No');
 
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Authorization': token ? `Bearer ${token}` : ''
     });
 
-    console.log('📋 Headers enviados:', { Authorization: token ? 'Bearer [token]' : 'No token' });
+    console.log(' Headers enviados:', { Authorization: token ? 'Bearer [token]' : 'No token' });
 
-    return this.http.post('http://localhost:3000/api/whatsapp/public/enviar-mensaje-cliente', payload, { headers });
+    return this.http.post(`${API_BASE_URL}/api/whatsapp/public/enviar-mensaje-cliente`, payload, { headers });
   }
 
   // ==================== UTILIDADES ====================
